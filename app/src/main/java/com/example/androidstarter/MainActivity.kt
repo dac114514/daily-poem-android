@@ -8,12 +8,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.List
+import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -59,12 +60,9 @@ private fun AppRoot(settingsVm: SettingsViewModel = viewModel()) {
         val currentRoute = backStack?.destination?.route
 
         val tabs = listOf(
-            TabItem(Routes.HOME, "首页",
-                outlined = Icons.Outlined.Home, filled = Icons.Filled.Home),
-            TabItem(Routes.LIST, "列表",
-                outlined = Icons.Outlined.List, filled = Icons.Filled.List),
-            TabItem(Routes.SETTINGS, "设置",
-                outlined = Icons.Outlined.Settings, filled = Icons.Filled.Settings),
+            TabItem(Routes.WIDGET, "组件", Icons.Outlined.Widgets, Icons.Filled.Widgets),
+            TabItem(Routes.DISPLAY, "数据展示", Icons.Outlined.Dashboard, Icons.Filled.Dashboard),
+            TabItem(Routes.SETTINGS, "设置", Icons.Outlined.Settings, Icons.Filled.Settings),
         )
 
         Scaffold(
@@ -107,6 +105,6 @@ private fun AppRoot(settingsVm: SettingsViewModel = viewModel()) {
 private data class TabItem(
     val route: String,
     val label: String,
-    val outlined: androidx.compose.ui.graphics.vector.ImageVector,
-    val filled: androidx.compose.ui.graphics.vector.ImageVector,
+    val outlined: ImageVector,
+    val filled: ImageVector,
 )
