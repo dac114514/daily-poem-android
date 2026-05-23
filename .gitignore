@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Claude Code settings
+.claude/
+
+# Design docs & implementation plans
+docs/superpowers/
