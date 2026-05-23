@@ -3,7 +3,7 @@ package com.example.androidstarter.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // ===== LIGHT MODE =====
-val BluePrimary = Color(0xFF2962FF)        // 亮蓝色 primary
+val BluePrimary = Color(0xFF2979FF)        // 亮蓝色 primary
 val OnBluePrimary = Color(0xFFFFFFFF)
 val BluePrimaryContainer = Color(0xFFD6E3FF)
 val OnBluePrimaryContainer = Color(0xFF001B3E)

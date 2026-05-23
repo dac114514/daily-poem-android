@@ -27,13 +27,16 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -69,13 +72,13 @@ fun WidgetScreen() {
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { }) {
-                    androidx.compose.material.icons.Icons.Filled.Favorite
+                    Icon(Icons.Filled.Favorite, contentDescription = null)
                 }
                 IconButton(onClick = { }) {
-                    androidx.compose.material.icons.Icons.Filled.CheckCircle
+                    Icon(Icons.Filled.CheckCircle, contentDescription = null)
                 }
                 IconButton(onClick = { }) {
-                    androidx.compose.material.icons.Icons.Filled.AutoAwesome
+                    Icon(Icons.Filled.AutoAwesome, contentDescription = null)
                 }
                 Text(
                     text = "IconButton 示例",
@@ -176,6 +179,12 @@ fun WidgetScreen() {
                     onClick = { selectedChip = !selectedChip },
                     label = { Text("筛选") },
                 )
+                InputChip(
+                    selected = selectedChip,
+                    onClick = { selectedChip = !selectedChip },
+                    label = { Text("输入") },
+                )
+                SuggestionChip(onClick = { }, label = { Text("建议") })
             }
         }
 

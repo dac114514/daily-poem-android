@@ -65,9 +65,11 @@ fun ExpandableSettingsCard(
                 )
             }
             AnimatedVisibility(visible = expanded) {
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    HorizontalDivider(modifier = Modifier.padding(top = 0.dp))
-                    content()
+                Column {
+                    HorizontalDivider()
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        content()
+                    }
                 }
             }
         }
