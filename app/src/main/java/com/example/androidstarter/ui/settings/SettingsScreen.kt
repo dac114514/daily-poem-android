@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.androidstarter.data.local.ThemeMode
 import com.example.androidstarter.ui.components.ExpandableSettingsCard
+import com.example.androidstarter.ui.components.ScreenHeader
 import com.example.androidstarter.ui.components.SettingsCard
 
 @Composable
@@ -39,9 +40,12 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 20.dp),
     ) {
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(24.dp))
+        ScreenHeader("设置")
+
+        Spacer(Modifier.height(24.dp))
 
         // 外观
         SettingsCard(icon = Icons.Filled.Palette, title = "外观") {
@@ -50,13 +54,19 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
                 selected = themeMode == ThemeMode.SYSTEM,
                 onClick = { vm.setThemeMode(ThemeMode.SYSTEM) },
             )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
             ThemeModeOption(
                 label = "浅色",
                 selected = themeMode == ThemeMode.LIGHT,
                 onClick = { vm.setThemeMode(ThemeMode.LIGHT) },
             )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
             ThemeModeOption(
                 label = "深色",
                 selected = themeMode == ThemeMode.DARK,
@@ -64,7 +74,7 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 关于
         ExpandableSettingsCard(
@@ -73,15 +83,13 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
             expanded = aboutExpanded,
             onToggle = { aboutExpanded = !aboutExpanded },
         ) {
-            Column(modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)) {
-                InfoRow("包名", "com.example.androidstarter")
-                InfoRow("版本", "1.0 (1)")
-                InfoRow("最低 SDK", "Android 7.0 (API 24)")
-                InfoRow("目标 SDK", "Android 15 (API 35)")
-            }
+            InfoRow("包名", "com.example.androidstarter")
+            InfoRow("版本", "1.0 (1)")
+            InfoRow("最低 SDK", "Android 7.0 (API 24)")
+            InfoRow("目标 SDK", "Android 15 (API 35)")
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(32.dp))
     }
 }
 

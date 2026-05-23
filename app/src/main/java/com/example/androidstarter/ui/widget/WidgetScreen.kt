@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.androidstarter.ui.components.ScreenHeader
 import com.example.androidstarter.ui.components.SettingsCard
 
 @Composable
@@ -57,9 +58,12 @@ fun WidgetScreen() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 20.dp),
     ) {
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(24.dp))
+        ScreenHeader("组件", "Material 3 控件展示")
+
+        Spacer(Modifier.height(24.dp))
 
         // 按钮
         SettingsCard(icon = Icons.Filled.TouchApp, title = "按钮") {
@@ -88,7 +92,7 @@ fun WidgetScreen() {
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 文本输入
         var text by remember { mutableStateOf("") }
@@ -103,7 +107,7 @@ fun WidgetScreen() {
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 开关
         var switchChecked by remember { mutableStateOf(false) }
@@ -117,7 +121,7 @@ fun WidgetScreen() {
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 复选框
         var checkA by remember { mutableStateOf(false) }
@@ -138,7 +142,7 @@ fun WidgetScreen() {
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 单选按钮
         var selectedRadio by remember { mutableStateOf(0) }
@@ -154,7 +158,7 @@ fun WidgetScreen() {
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 滑块
         var sliderValue by remember { mutableFloatStateOf(0.5f) }
@@ -167,7 +171,7 @@ fun WidgetScreen() {
             Slider(value = sliderValue, onValueChange = { sliderValue = it })
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 芯片
         var selectedChip by remember { mutableStateOf(false) }
@@ -188,7 +192,7 @@ fun WidgetScreen() {
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 进度指示器
         SettingsCard(icon = Icons.Filled.Favorite, title = "进度指示器") {
@@ -197,6 +201,6 @@ fun WidgetScreen() {
             CircularProgressIndicator(modifier = Modifier.size(32.dp))
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(32.dp))
     }
 }

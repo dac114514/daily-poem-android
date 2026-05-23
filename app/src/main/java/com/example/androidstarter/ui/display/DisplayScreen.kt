@@ -13,21 +13,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.example.androidstarter.ui.components.ScreenHeader
 import com.example.androidstarter.ui.components.SettingsCard
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -47,20 +47,23 @@ fun DisplayScreen() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 20.dp),
     ) {
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(24.dp))
+        ScreenHeader("数据展示", "设计系统预览")
+
+        Spacer(Modifier.height(24.dp))
 
         // Typography
         SettingsCard(icon = Icons.Filled.FormatSize, title = "字体排版") {
             val styles = listOf(
                 "Display Large" to MaterialTheme.typography.displayLarge,
+                "Display Medium" to MaterialTheme.typography.displayMedium,
                 "Headline Large" to MaterialTheme.typography.headlineLarge,
                 "Title Large" to MaterialTheme.typography.titleLarge,
                 "Title Medium" to MaterialTheme.typography.titleMedium,
                 "Body Large" to MaterialTheme.typography.bodyLarge,
                 "Body Medium" to MaterialTheme.typography.bodyMedium,
-                "Label Large" to MaterialTheme.typography.labelLarge,
                 "Label Small" to MaterialTheme.typography.labelSmall,
             )
             styles.forEach { (name, style) ->
@@ -72,7 +75,25 @@ fun DisplayScreen() {
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
+
+        // Pull Quote
+        SettingsCard(icon = Icons.Filled.FormatQuote, title = "引用") {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.primaryContainer,
+            ) {
+                Text(
+                    text = "Good design is as little design as possible.",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(20.dp),
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
 
         // 色板
         SettingsCard(icon = Icons.Filled.Brush, title = "颜色色板") {
@@ -95,7 +116,7 @@ fun DisplayScreen() {
                         Box(
                             modifier = Modifier
                                 .size(56.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(MaterialTheme.shapes.small)
                                 .background(color),
                         )
                         Spacer(Modifier.height(4.dp))
@@ -109,51 +130,55 @@ fun DisplayScreen() {
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // 卡片示例
-        SettingsCard(icon = Icons.Filled.Dashboard, title = "卡片示例") {
-            Card(
+        // 表面
+        SettingsCard(icon = Icons.Filled.Layers, title = "表面") {
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.primaryContainer,
             ) {
                 Text(
-                    text = "这是 primaryContainer 颜色的卡片",
+                    text = "primaryContainer 表面",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.padding(16.dp),
                 )
             }
             Spacer(Modifier.height(8.dp))
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                ),
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.surfaceVariant,
             ) {
                 Text(
-                    text = "这是 secondaryContainer 颜色的卡片",
+                    text = "surfaceVariant 表面",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
                 )
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 分割线示例
         SettingsCard(icon = Icons.Filled.ListAlt, title = "分割线") {
             Text("上方有分割线的文字", style = MaterialTheme.typography.bodyMedium)
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 12.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
             Text("下方有分割线的文字", style = MaterialTheme.typography.bodyMedium)
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 12.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
             Text("再次分割", style = MaterialTheme.typography.bodyMedium)
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 图标网格
         SettingsCard(icon = Icons.Filled.GridOn, title = "图标网格") {
@@ -171,8 +196,8 @@ fun DisplayScreen() {
                 ).forEach { (icon, label) ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Surface(
-                            modifier = Modifier.size(48.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.size(52.dp),
+                            shape = MaterialTheme.shapes.small,
                             color = MaterialTheme.colorScheme.primaryContainer,
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -195,6 +220,6 @@ fun DisplayScreen() {
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(32.dp))
     }
 }
