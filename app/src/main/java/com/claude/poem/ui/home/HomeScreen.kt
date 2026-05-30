@@ -13,16 +13,17 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -100,59 +101,54 @@ fun HomeScreen(
                 ) {
                     PoemCard(
                         poem = poem!!,
-                        onToggleFavorite = { vm.toggleFavorite() },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     Spacer(Modifier.height(24.dp))
 
-                    // Action buttons
-                    Column(
+                    // Action Row: 分享 · 收藏 · 下一首
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .widthIn(max = 480.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                            .widthIn(max = 360.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Button(
+                        OutlinedIconButton(
+                            onClick = { /* share - will be implemented in Task 7 */ },
+                            modifier = Modifier.size(56.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Share,
+                                contentDescription = "分享",
+                            )
+                        }
+
+                        OutlinedIconButton(
+                            onClick = { vm.toggleFavorite() },
+                            modifier = Modifier.size(56.dp),
+                        ) {
+                            Icon(
+                                imageVector = if (poem!!.isFavorite) Icons.Filled.Favorite
+                                              else Icons.Filled.FavoriteBorder,
+                                contentDescription = if (poem!!.isFavorite) "取消收藏" else "收藏",
+                                tint = if (poem!!.isFavorite) MaterialTheme.colorScheme.primary
+                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        FilledIconButton(
                             onClick = { vm.refreshPoem() },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.medium,
-                            colors = ButtonDefaults.buttonColors(
+                            modifier = Modifier.size(56.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                             ),
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = null,
-                                modifier = Modifier.padding(end = 8.dp),
+                                imageVector = Icons.Filled.SkipNext,
+                                contentDescription = "下一首",
+                                tint = MaterialTheme.colorScheme.onPrimary,
                             )
-                            Text("换一首", style = MaterialTheme.typography.labelLarge)
-                        }
-
-                        OutlinedButton(
-                            onClick = {
-                                val text = vm.getShareText()
-                                if (text.isNotBlank()) {
-                                    val sendIntent = Intent().apply {
-                                        action = Intent.ACTION_SEND
-                                        putExtra(Intent.EXTRA_TEXT, text)
-                                        type = "text/plain"
-                                    }
-                                    context.startActivity(
-                                        Intent.createChooser(sendIntent, "分享诗词")
-                                    )
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.medium,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Share,
-                                contentDescription = null,
-                                modifier = Modifier.padding(end = 8.dp),
-                            )
-                            Text("分享", style = MaterialTheme.typography.labelLarge)
                         }
                     }
 
