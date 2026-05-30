@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,6 +45,7 @@ fun SettingsScreen(
     val themeMode by vm.themeMode.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
     var aboutExpanded by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
 
     if (showThemeDialog) {
         ThemeModeDialog(
@@ -124,13 +126,13 @@ fun SettingsScreen(
             Column(modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)) {
                 // 应用信息
                 Text(
-                    text = "Android Starter",
+                    text = "每日诗文",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "基于 Jetpack Compose + Material Design 3 的 Android 项目初始模板，提供常用组件展示和开箱即用的项目结构。",
+                    text = "一款 Jetpack Compose 打造的古诗词应用。精选唐诗宋词，每日一诗，邂逅文字之美。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 )
@@ -141,7 +143,23 @@ fun SettingsScreen(
 
                 InfoRow("开发者", "dac114514")
                 Spacer(Modifier.height(4.dp))
-                InfoRow("项目地址", "github.com/dac114514/android-starter")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { uriHandler.openUri("https://github.com/dac114514/daily-poem-android") },
+                ) {
+                    Text(
+                        text = "项目地址",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.width(80.dp),
+                    )
+                    Text(
+                        text = "github.com/dac114514/daily-poem-android",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
                 Spacer(Modifier.height(4.dp))
                 InfoRow("包名", BuildConfig.APPLICATION_ID)
                 Spacer(Modifier.height(4.dp))
@@ -149,7 +167,7 @@ fun SettingsScreen(
                 Spacer(Modifier.height(4.dp))
                 InfoRow("最低 SDK", "Android 7.0 (API 24)")
                 Spacer(Modifier.height(4.dp))
-                InfoRow("目标 SDK", "Android 15 (API 35)")
+                InfoRow("目标 SDK", "Android 16 (API 36)")
             }
         }
 
