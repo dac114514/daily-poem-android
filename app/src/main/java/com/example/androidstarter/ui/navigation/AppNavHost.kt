@@ -5,9 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.androidstarter.ui.display.DisplayScreen
+import com.example.androidstarter.ui.favorites.FavoritesScreen
+import com.example.androidstarter.ui.home.HomeScreen
 import com.example.androidstarter.ui.settings.SettingsScreen
-import com.example.androidstarter.ui.widget.WidgetScreen
+import com.example.androidstarter.ui.statistics.StatisticsScreen
 
 @Composable
 fun AppNavHost(
@@ -16,11 +17,29 @@ fun AppNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.WIDGET,
+        startDestination = Routes.HOME,
         modifier = modifier,
     ) {
-        composable(Routes.WIDGET) { WidgetScreen() }
-        composable(Routes.DISPLAY) { DisplayScreen() }
-        composable(Routes.SETTINGS) { SettingsScreen() }
+        composable(Routes.HOME) {
+            HomeScreen(
+                onNavigateToFavorites = { navController.navigate(Routes.FAVORITES) },
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
+            )
+        }
+        composable(Routes.FAVORITES) {
+            FavoritesScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onNavigateToStatistics = { navController.navigate(Routes.STATISTICS) },
+            )
+        }
+        composable(Routes.STATISTICS) {
+            StatisticsScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
     }
 }

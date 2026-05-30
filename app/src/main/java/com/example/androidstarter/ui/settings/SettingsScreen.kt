@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.AlertDialog
@@ -36,7 +37,10 @@ import com.example.androidstarter.ui.components.SettingsCard
 import com.example.androidstarter.BuildConfig
 
 @Composable
-fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
+fun SettingsScreen(
+    onNavigateToStatistics: () -> Unit = {},
+    vm: SettingsViewModel = viewModel(),
+) {
     val themeMode by vm.themeMode.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
     var aboutExpanded by remember { mutableStateOf(false) }
@@ -82,6 +86,28 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // 数据统计
+        SettingsCard(
+            icon = Icons.Filled.BarChart,
+            title = "数据统计",
+            modifier = Modifier.clickable { onNavigateToStatistics() },
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "查看使用数据与活跃统计",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

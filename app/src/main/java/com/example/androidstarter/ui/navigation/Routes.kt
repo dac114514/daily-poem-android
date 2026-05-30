@@ -1,7 +1,8 @@
 package com.example.androidstarter.ui.navigation
 
 object Routes {
-    const val WIDGET = "widget"
-    const val DISPLAY = "display"
+    const val HOME = "home"
+    const val FAVORITES = "favorites"
     const val SETTINGS = "settings"
+    const val STATISTICS = "statistics"
 }
