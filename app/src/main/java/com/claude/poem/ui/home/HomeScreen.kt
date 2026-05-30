@@ -89,11 +89,12 @@ fun HomeScreen(
                 .padding(padding),
             contentAlignment = Alignment.Center,
         ) {
-            if (isLoading && poem == null) {
+            val currentPoem = poem
+            if (isLoading && currentPoem == null) {
                 CircularProgressIndicator(
                     color = MaterialTheme.colorScheme.primary,
                 )
-            } else if (poem != null) {
+            } else if (currentPoem != null) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -102,7 +103,7 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     PoemCard(
-                        poem = poem,
+                        poem = currentPoem,
                         modifier = Modifier.fillMaxWidth(),
                     )
 
@@ -142,10 +143,10 @@ fun HomeScreen(
                             modifier = Modifier.size(56.dp),
                         ) {
                             Icon(
-                                imageVector = if (poem.isFavorite) Icons.Filled.Favorite
+                                imageVector = if (currentPoem.isFavorite) Icons.Filled.Favorite
                                               else Icons.Filled.FavoriteBorder,
-                                contentDescription = if (poem.isFavorite) "取消收藏" else "收藏",
-                                tint = if (poem.isFavorite) MaterialTheme.colorScheme.primary
+                                contentDescription = if (currentPoem.isFavorite) "取消收藏" else "收藏",
+                                tint = if (currentPoem.isFavorite) MaterialTheme.colorScheme.primary
                                        else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
