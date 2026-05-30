@@ -1,64 +1,140 @@
-# Android Template
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png">
+    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" width="80">
+  </picture>
+</p>
 
-基于 **Jetpack Compose + Material Design 3** 的 Android 项目初始模板，提供常用组件展示和开箱即用的项目结构。
+<h1 align="center">每日诗文</h1>
 
-[![Android CI](https://github.com/dac114514/android-starter/actions/workflows/android.yml/badge.svg)](https://github.com/dac114514/android-starter/actions/workflows/android.yml)
+<p align="center">
+  <b>简洁 · 雅致 · 沉浸</b><br>
+  一款 Jetpack Compose 打造的 Android 古诗词应用
+</p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/Compose-2026.05.00-2ea44f?logo=jetpackcompose">
+  <img src="https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin">
+  <img src="https://img.shields.io/badge/minSdk-24-FF6F00?logo=android">
+  <img src="https://img.shields.io/badge/targetSdk-36-34A853?logo=android">
+  <br>
+  <img src="https://github.com/dac114514/daily-poem-android/actions/workflows/android.yml/badge.svg">
+</p>
 
-## 特性
+<br>
 
-- **Material 3 蓝色主题** — 完整 light/dark color scheme，支持 Android 12+ Material You 动态取色
-- **卡片化组件** — `SettingsCard`、`ExpandableSettingsCard` 可复用 UI 组件
-- **底部导航** — 3 个 Tab（组件 / 数据展示 / 设置），Navigation Compose 管理路由
-- **ViewModel + StateFlow** — 主题偏好通过 DataStore 持久化，重启保留
-- **GitHub Actions CI** — 推送自动触发 `assembleDebug`
+## ✦ 设计
 
-## 快速开始
+延续 Claude 温暖编辑风格，以陶土色和暖白为基调，Serif 衬线字体演绎文字之美。
 
-1. **替换包名** — 全局搜索 `com.example.androidstarter` 替换为你的包名
-2. **修改应用名** — `app/src/main/res/values/strings.xml`
-3. **修改模块配置** — `app/build.gradle.kts` 中的 `namespace` 和 `applicationId`
-4. **重命名目录** — `app/src/main/java/com/example/androidstarter/` 重命名为你的包路径
-5. **替换图标** — `res/mipmap-*/` 和 `res/drawable/ic_launcher_*`
+| 色板 | 字体 | 形态 |
+|------|------|------|
+| 🏺 陶土 `#D97757` | 标题：Serif（衬线） | 18dp 大圆角 |
+| 🧈 暖白 `#F5F0EB` | 正文：SansSerif（无衬线） | 温和的阴影 |
+| 🌰 深褐 `#5C2A11` | 行距：32sp 舒适间距 | 留白呼吸感 |
 
-## 技术栈
+<br>
 
-| 项目 | 版本 |
-|---|---|
-| Kotlin | 2.3.21 |
-| Android Gradle Plugin | 9.2.0 |
-| Compose BOM | 2026.05.00 |
-| Navigation Compose | 2.9.8 |
-| Lifecycle ViewModel Compose | 2.10.0 |
-| DataStore Preferences | 1.2.1 |
-| minSdk / targetSdk | 24 / 36 |
+## ✦ 功能
 
-## 项目结构
+```
+┌─────────────────────────────────┐
+│  ✦ 每日诗文        [♡] [⚙]    │
+├─────────────────────────────────┤
+│                                 │
+│       ┌─────────────┐           │
+│       │  静夜思      │           │
+│       │  李白        │           │
+│       │             │           │
+│       │  床前明月光  │           │
+│       │  疑是地上霜  │           │
+│       │  举头望明月  │           │
+│       │  低头思故乡  │           │
+│       └─────────────┘           │
+│                                 │
+│    [ 🔄 换一首 ]  [ 📤 分享 ]   │
+└─────────────────────────────────┘
+```
+
+- **📜 每日一诗** — 精选 25 首唐诗宋词，随机呈现
+- **🔄 换一首** — 轻点切换，邂逅下一首
+- **♡ 收藏** — 心仪的诗句，一键珍藏
+- **📤 分享** — 以文字之美，打动更多人
+- **📊 统计** — 浏览与收藏数据一览（预设接口）
+
+<br>
+
+## ✦ 技术栈
+
+```
+┌─ 表现层 ─────────────────────┐
+│  Jetpack Compose  (Material3) │
+│  Navigation Compose           │
+│  Canvas 图表  (自定义绘制)     │
+├─ 状态层 ──────────────────────┤
+│  ViewModel + StateFlow        │
+│  Flow + collectAsState        │
+├─ 数据层 ──────────────────────┤
+│  Room   (收藏持久化)           │
+│  Gson   (JSON 解析)            │
+│  DataStore  (主题设置)         │
+└───────────────────────────────┘
+```
+
+| 依赖 | 版本 | 用途 |
+|------|------|------|
+| Kotlin | 2.3.21 | 语言 |
+| Compose BOM | 2026.05.00 | UI 框架 |
+| Room | 2.7.1 | 本地数据库 |
+| Navigation Compose | 2.9.8 | 页面路由 |
+| Gson | 2.11.0 | JSON 解析 |
+| DataStore | 1.2.1 | 偏好设置 |
+
+<br>
+
+## ✦ 项目结构
 
 ```
 app/src/main/java/com/example/androidstarter/
-├── MainActivity.kt                  # 入口：底部导航 + 主题收集
+├── MainActivity.kt           # 入口 · 主题收集
 ├── data/
-│   └── local/
-│       ├── ThemeMode.kt             # 主题模式枚举
-│       └── PreferencesRepository.kt # DataStore 读写封装
-└── ui/
-    ├── theme/
-    │   ├── Color.kt                 # 蓝色调色板（含深色变体）
-    │   ├── Theme.kt                 # 主题 + 动态取色
-    │   └── Type.kt                  # 字体排版
-    ├── navigation/
-    │   ├── Routes.kt                # 路由常量
-    │   └── AppNavHost.kt            # NavHost 配置
-    ├── components/
-    │   ├── SettingsCard.kt          # 通用卡片组件
-    │   └── ExpandableSettingsCard.kt# 可展开卡片
-    ├── widget/
-    │   └── WidgetScreen.kt          # 组件展示页
-    ├── display/
-    │   └── DisplayScreen.kt         # 数据展示页
-    └── settings/
-        ├── SettingsScreen.kt        # 设置页
-        └── SettingsViewModel.kt
+│   ├── model/Poem.kt         # 诗词数据模型 + Room Entity
+│   ├── local/
+│   │   ├── PoemDao.kt        # Room DAO · 随机/收藏/查询
+│   │   ├── AppDatabase.kt    # Room 数据库
+│   │   └── ...               # 主题偏好 (DataStore)
+│   └── repository/
+│       └── PoemRepository.kt # 数据仓库 · JSON 导入
+├── ui/
+│   ├── home/                 # 首页 · 诗文卡片
+│   ├── favorites/            # 我的收藏
+│   ├── statistics/           # 数据统计 · 图表
+│   ├── settings/             # 设置 · 主题切换
+│   ├── components/           # 可复用组件
+│   ├── navigation/           # 路由导航
+│   └── theme/                # Claude 暖色调主题
+└── assets/
+    └── poems.json            # 25首古诗词数据
 ```
+
+<br>
+
+## ✦ 构建
+
+```bash
+# Debug APK
+./gradlew assembleDebug
+
+# 安装
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+每次推送自动触发 GitHub Actions 构建，APK 发布至 Releases。
+
+<br>
+
+---
+
+<p align="center">
+  <sub>Built with 🩵 and Jetpack Compose</sub>
+</p>
