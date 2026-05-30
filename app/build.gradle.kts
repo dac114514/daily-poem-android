@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.androidstarter"
+    namespace = "com.claude.poem"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.androidstarter"
+        applicationId = "com.claude.poem"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
