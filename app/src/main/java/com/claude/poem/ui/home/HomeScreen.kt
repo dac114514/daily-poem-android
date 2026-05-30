@@ -115,7 +115,18 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         OutlinedIconButton(
-                            onClick = { /* share - will be implemented in Task 7 */ },
+                            onClick = {
+                                val shareUri = vm.getShareImageUri(context)
+                                if (shareUri != null) {
+                                    val shareIntent = Intent().apply {
+                                        action = Intent.ACTION_SEND
+                                        putExtra(Intent.EXTRA_STREAM, shareUri)
+                                        type = "image/png"
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(Intent.createChooser(shareIntent, "分享诗词"))
+                                }
+                            },
                             modifier = Modifier.size(56.dp),
                         ) {
                             Icon(
