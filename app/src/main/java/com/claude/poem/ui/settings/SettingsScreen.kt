@@ -12,14 +12,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,14 +39,16 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.claude.poem.BuildConfig
 import com.claude.poem.data.local.ThemeMode
 import com.claude.poem.ui.components.ExpandableSettingsCard
 import com.claude.poem.ui.components.SettingsCard
-import com.claude.poem.BuildConfig
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onNavigateToStatistics: () -> Unit = {},
+    onNavigateBack: () -> Unit = {},
     vm: SettingsViewModel = viewModel(),
 ) {
     val themeMode by vm.themeMode.collectAsState()
@@ -58,120 +67,146 @@ fun SettingsScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-    ) {
-        Spacer(Modifier.height(12.dp))
-
-        // 外观
-        SettingsCard(icon = Icons.Filled.Palette, title = "外观") {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showThemeDialog = true }
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "主题模式",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = when (themeMode) {
-                        ThemeMode.SYSTEM -> "跟随系统"
-                        ThemeMode.LIGHT -> "浅色"
-                        ThemeMode.DARK -> "深色"
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // 数据统计
-        SettingsCard(
-            icon = Icons.Filled.BarChart,
-            title = "数据统计",
-            modifier = Modifier.clickable { onNavigateToStatistics() },
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "设置",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "返回",
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "查看使用数据与活跃统计",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
+            Spacer(Modifier.height(12.dp))
 
-        Spacer(Modifier.height(12.dp))
-
-        // 关于
-        ExpandableSettingsCard(
-            icon = Icons.Filled.Info,
-            title = "关于",
-            expanded = aboutExpanded,
-            onToggle = { aboutExpanded = !aboutExpanded },
-        ) {
-            Column(modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)) {
-                // 应用信息
-                Text(
-                    text = "每日诗文",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "一款 Jetpack Compose 打造的古诗词应用。精选唐诗宋词，每日一诗，邂逅文字之美。",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                )
-                Spacer(Modifier.height(16.dp))
-
-                HorizontalDivider()
-                Spacer(Modifier.height(12.dp))
-
-                InfoRow("开发者", "dac114514")
-                Spacer(Modifier.height(4.dp))
+            // 外观
+            SettingsCard(icon = Icons.Filled.Palette, title = "外观") {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { uriHandler.openUri("https://github.com/dac114514/daily-poem-android") },
+                        .clickable { showThemeDialog = true }
+                        .padding(vertical = 8.dp, horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "项目地址",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        modifier = Modifier.width(80.dp),
+                        text = "主题模式",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f),
                     )
                     Text(
-                        text = "github.com/dac114514/daily-poem-android",
+                        text = when (themeMode) {
+                            ThemeMode.SYSTEM -> "跟随系统"
+                            ThemeMode.LIGHT -> "浅色"
+                            ThemeMode.DARK -> "深色"
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
-                Spacer(Modifier.height(4.dp))
-                InfoRow("包名", BuildConfig.APPLICATION_ID)
-                Spacer(Modifier.height(4.dp))
-                InfoRow("版本", "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
-                Spacer(Modifier.height(4.dp))
-                InfoRow("最低 SDK", "Android 7.0 (API 24)")
-                Spacer(Modifier.height(4.dp))
-                InfoRow("目标 SDK", "Android 16 (API 36)")
             }
-        }
 
-        Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(12.dp))
+
+            // 数据统计
+            SettingsCard(
+                icon = Icons.Filled.BarChart,
+                title = "数据统计",
+                modifier = Modifier.clickable { onNavigateToStatistics() },
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "查看使用数据与活跃统计",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // 关于
+            ExpandableSettingsCard(
+                icon = Icons.Filled.Info,
+                title = "关于",
+                expanded = aboutExpanded,
+                onToggle = { aboutExpanded = !aboutExpanded },
+            ) {
+                Column(modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)) {
+                    // 应用信息
+                    Text(
+                        text = "每日诗文",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "一款 Jetpack Compose 打造的古诗词应用。精选唐诗宋词，每日一诗，邂逅文字之美。",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    )
+                    Spacer(Modifier.height(16.dp))
+
+                    HorizontalDivider()
+                    Spacer(Modifier.height(12.dp))
+
+                    InfoRow("开发者", "dac114514")
+                    Spacer(Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { uriHandler.openUri("https://github.com/dac114514/daily-poem-android") },
+                    ) {
+                        Text(
+                            text = "项目地址",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.width(80.dp),
+                        )
+                        Text(
+                            text = "github.com/dac114514/daily-poem-android",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    InfoRow("包名", BuildConfig.APPLICATION_ID)
+                    Spacer(Modifier.height(4.dp))
+                    InfoRow("版本", "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+                    Spacer(Modifier.height(4.dp))
+                    InfoRow("最低 SDK", "Android 7.0 (API 24)")
+                    Spacer(Modifier.height(4.dp))
+                    InfoRow("目标 SDK", "Android 16 (API 36)")
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+        }
     }
 }
 

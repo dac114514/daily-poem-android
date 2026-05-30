@@ -34,6 +34,7 @@ fun AppNavHost(
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onNavigateToStatistics = { navController.navigate(Routes.STATISTICS) },
+                onNavigateBack = { navController.popBackStack() },
             )
         }
         composable(Routes.STATISTICS) {
