@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,16 +24,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.claude.poem.data.model.Poem
 
@@ -43,6 +49,15 @@ fun FavoritesScreen(
     vm: FavoritesViewModel = viewModel(),
 ) {
     val poems by vm.favoritePoems.collectAsState()
+    var previewPoem by remember { mutableStateOf<Poem?>(null) }
+
+    previewPoem?.let { poem ->
+        PoemPreviewDialog(
+            poem = poem,
+            onRemoveFavorite = { vm.removeFavorite(poem.id) },
+            onDismiss = { previewPoem = null },
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -106,7 +121,7 @@ fun FavoritesScreen(
                 items(poems, key = { it.id }) { poem ->
                     FavoriteItem(
                         poem = poem,
-                        onClick = { vm.removeFavorite(poem.id) },
+                        onClick = { previewPoem = poem },
                     )
                 }
             }
@@ -153,4 +168,50 @@ private fun FavoriteItem(
             )
         }
     }
+}
+
+@Composable
+private fun PoemPreviewDialog(
+    poem: Poem,
+    onRemoveFavorite: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                onRemoveFavorite()
+                onDismiss()
+            }) {
+                Text("取消收藏", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("关闭")
+            }
+        },
+        title = {
+            Text(poem.title, fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column {
+                Text(
+                    text = "${poem.author} · ${poem.dynasty}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = poem.content,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = FontFamily.Serif,
+                        fontSize = 18.sp,
+                        lineHeight = 32.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        },
+    )
 }
