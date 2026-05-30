@@ -35,6 +35,7 @@ fun CalendarHeatmap(
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
 
     val density = LocalDensity.current
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     val cal = Calendar.getInstance()
     cal.set(year, month, 1)
@@ -122,7 +123,7 @@ fun CalendarHeatmap(
                             // Day number
                             val textPaint = android.graphics.Paint().apply {
                                 color = if (intensity > 0.3f) {
-                                    if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
+                                    if (isDark)
                                         android.graphics.Color.WHITE
                                     else
                                         android.graphics.Color.BLACK
@@ -137,7 +138,7 @@ fun CalendarHeatmap(
                             drawContext.canvas.nativeCanvas.drawText(
                                 effectiveDay.toString(),
                                 x + cellW / 2,
-                                y + cellH / 2 + textSize / 3f,
+                                y + cellH / 2 + textPaint.textSize / 3f,
                                 textPaint
                             )
                         }

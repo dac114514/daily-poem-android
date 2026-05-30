@@ -1,5 +1,7 @@
 package com.example.androidstarter.ui.components
 
+import com.example.androidstarter.ui.statistics.WeeklyData
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
