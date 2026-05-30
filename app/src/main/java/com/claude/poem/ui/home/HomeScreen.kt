@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -100,7 +102,7 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     PoemCard(
-                        poem = poem!!,
+                        poem = poem,
                         modifier = Modifier.fillMaxWidth(),
                     )
 
@@ -140,10 +142,10 @@ fun HomeScreen(
                             modifier = Modifier.size(56.dp),
                         ) {
                             Icon(
-                                imageVector = if (poem!!.isFavorite) Icons.Filled.Favorite
+                                imageVector = if (poem.isFavorite) Icons.Filled.Favorite
                                               else Icons.Filled.FavoriteBorder,
-                                contentDescription = if (poem!!.isFavorite) "取消收藏" else "收藏",
-                                tint = if (poem!!.isFavorite) MaterialTheme.colorScheme.primary
+                                contentDescription = if (poem.isFavorite) "取消收藏" else "收藏",
+                                tint = if (poem.isFavorite) MaterialTheme.colorScheme.primary
                                        else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }

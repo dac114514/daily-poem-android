@@ -55,13 +55,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         _currentPoem.value = repository.getPoemById(poem.id)
     }
 
-    fun getShareText(): String {
-        val poem = _currentPoem.value ?: return ""
-        return "「${poem.title}」\n${poem.content}\n\n——${poem.author}《${poem.title}》"
-    }
-
     fun getShareImageUri(context: Context): Uri? {
         val poem = _currentPoem.value ?: return null
+
+        // Clean up previous share images
+        cleanupShareImage(context)
 
         val width = 800
         val padding = 64
@@ -84,13 +82,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             typeface = android.graphics.Typeface.SERIF
         }
 
-        // Build content text with line breaks
-        val contentText = poem.content.replace("\\n", "\n")
-
         // Measure heights
         val titleLayout = StaticLayout(poem.title, titlePaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1f, 0f, false)
         val authorLayout = StaticLayout(poem.author, authorPaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1f, 0f, false)
-        val contentLayout = StaticLayout(contentText, contentPaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1.8f, 0f, false)
+        val contentLayout = StaticLayout(poem.content, contentPaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1.8f, 0f, false)
 
         val totalHeight = padding * 2 + titleLayout.height + 40 + authorLayout.height + 60 + contentLayout.height
 
@@ -136,6 +131,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         FileOutputStream(file).use { out ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         }
+        bitmap.recycle()
 
         return FileProvider.getUriForFile(
             context,
