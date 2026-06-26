@@ -18,8 +18,11 @@ import com.claude.poem.data.model.Poem
 import com.claude.poem.data.repository.PoemRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -34,52 +37,67 @@ class HomeViewModel(
     private val repository = PoemRepository(application)
     private val statsRepo = StatsRepository(application)
 
-    private val _currentPoem = MutableStateFlow<Poem?>(null)
-    val currentPoem: StateFlow<Poem?> = _currentPoem.asStateFlow()
+    private val _poemsDeck = MutableStateFlow<List<Poem>>(emptyList())
+    val poemsDeck: StateFlow<List<Poem>> = _poemsDeck.asStateFlow()
+
+    private val _currentPoemIndex = MutableStateFlow(0)
+    val currentPoemIndex: StateFlow<Int> = _currentPoemIndex.asStateFlow()
+
+    val currentPoem: StateFlow<Poem?> = combine(
+        _poemsDeck,
+        _currentPoemIndex,
+    ) { deck, index ->
+        deck.getOrNull(index)
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        null,
+    )
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        val savedId = savedStateHandle.get<Long>(KEY_POEM_ID)
-        if (savedId != null && savedId > 0) {
-            viewModelScope.launch {
-                _currentPoem.value = repository.getPoemById(savedId)
-                if (_currentPoem.value == null) refreshPoem()
-            }
-        } else {
-            refreshPoem()
-        }
-    }
-
-    fun refreshPoem() {
+        val savedIndex = savedStateHandle.get<Int>(KEY_INDEX) ?: 0
+        _currentPoemIndex.value = savedIndex
         viewModelScope.launch {
             _isLoading.value = true
-            val poem = repository.getRandomPoem()
-            _currentPoem.value = poem
-            if (poem != null) {
-                savedStateHandle[KEY_POEM_ID] = poem.id
-                statsRepo.recordView()
+            val deck = repository.getAllPoems()
+            if (deck.isNotEmpty()) {
+                val safeIndex = ((savedIndex % deck.size) + deck.size) % deck.size
+                _currentPoemIndex.value = safeIndex
             }
+            _poemsDeck.value = deck
             _isLoading.value = false
         }
     }
 
+    fun onCarouselIndexChange(newIndex: Int) {
+        val deck = _poemsDeck.value
+        if (deck.isEmpty()) return
+        val wrapped = ((newIndex % deck.size) + deck.size) % deck.size
+        if (wrapped == _currentPoemIndex.value) return
+        _currentPoemIndex.value = wrapped
+        savedStateHandle[KEY_INDEX] = wrapped
+        statsRepo.recordView()
+    }
+
     fun toggleFavorite() {
-        val poem = _currentPoem.value ?: return
+        val poem = _poemsDeck.value.getOrNull(_currentPoemIndex.value) ?: return
         viewModelScope.launch {
             repository.toggleFavorite(poem.id)
-            refreshCurrentPoem()
+            val updated = repository.getPoemById(poem.id) ?: return@launch
+            val deck = _poemsDeck.value.toMutableList()
+            val idx = deck.indexOfFirst { it.id == poem.id }
+            if (idx >= 0) {
+                deck[idx] = updated
+                _poemsDeck.value = deck
+            }
         }
     }
 
-    private suspend fun refreshCurrentPoem() {
-        val poem = _currentPoem.value ?: return
-        _currentPoem.value = repository.getPoemById(poem.id)
-    }
-
     suspend fun prepareSharePreview(context: Context): SharePreview? {
-        val poem = _currentPoem.value ?: return null
+        val poem = _poemsDeck.value.getOrNull(_currentPoemIndex.value) ?: return null
         cleanupShareImage(context)
         val bitmap = withContext(Dispatchers.Default) { renderShareBitmap(poem) }
         val uri = saveShareBitmap(context, bitmap, poem.id)
@@ -221,7 +239,7 @@ class HomeViewModel(
     }
 
     private companion object {
-        const val KEY_POEM_ID = "current_poem_id"
+        const val KEY_INDEX = "carousel_index"
         const val SHARE_CACHE_DIR = "poem_share"
 
         const val CANVAS_WIDTH = 800

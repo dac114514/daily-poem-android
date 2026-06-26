@@ -12,6 +12,9 @@ interface PoemDao {
     @Query("SELECT * FROM poems ORDER BY RANDOM() LIMIT 1")
     suspend fun getRandomPoem(): PoemEntity?
 
+    @Query("SELECT * FROM poems ORDER BY id")
+    suspend fun getAllPoems(): List<PoemEntity>
+
     @Query("SELECT * FROM poems WHERE id = :id")
     suspend fun getPoemById(id: Long): PoemEntity?
 

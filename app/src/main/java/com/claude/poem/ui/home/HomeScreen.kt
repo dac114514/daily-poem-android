@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.claude.poem.R
 import com.claude.poem.ui.components.DpIcon
-import com.claude.poem.ui.components.PoemCard
+import com.claude.poem.ui.components.RingCarousel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,7 +61,9 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     vm: HomeViewModel = viewModel(),
 ) {
-    val poem by vm.currentPoem.collectAsState()
+    val deck by vm.poemsDeck.collectAsState()
+    val currentIndex by vm.currentPoemIndex.collectAsState()
+    val currentPoem by vm.currentPoem.collectAsState()
     val isLoading by vm.isLoading.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -126,92 +128,98 @@ fun HomeScreen(
                 .padding(padding),
             contentAlignment = Alignment.Center,
         ) {
-            val currentPoem = poem
-            if (isLoading && currentPoem == null) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            } else if (currentPoem != null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    PoemCard(
-                        poem = currentPoem,
-                        modifier = Modifier.fillMaxWidth(),
+            when {
+                isLoading && deck.isEmpty() -> {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
                     )
-
-                    Spacer(Modifier.height(24.dp))
-
-                    Row(
+                }
+                deck.isNotEmpty() -> {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .widthIn(max = 360.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
+                            .padding(horizontal = 20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
                     ) {
-                        OutlinedIconButton(
-                            onClick = {
-                                if (isPreparingShare) return@OutlinedIconButton
-                                isPreparingShare = true
-                                scope.launch {
-                                    val preview = withContext(Dispatchers.IO) {
-                                        vm.prepareSharePreview(context)
-                                    }
-                                    isPreparingShare = false
-                                    if (preview != null) sharePreview = preview
-                                }
-                            },
-                            enabled = !isPreparingShare,
-                            modifier = Modifier.size(56.dp),
+                        RingCarousel(
+                            poems = deck,
+                            currentIndex = currentIndex,
+                            onIndexChange = vm::onCarouselIndexChange,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+
+                        Spacer(Modifier.height(24.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .widthIn(max = 360.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            if (isPreparingShare) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    strokeWidth = 2.dp,
-                                )
-                            } else {
+                            OutlinedIconButton(
+                                onClick = {
+                                    if (isPreparingShare) return@OutlinedIconButton
+                                    isPreparingShare = true
+                                    scope.launch {
+                                        val preview = withContext(Dispatchers.IO) {
+                                            vm.prepareSharePreview(context)
+                                        }
+                                        isPreparingShare = false
+                                        if (preview != null) sharePreview = preview
+                                    }
+                                },
+                                enabled = !isPreparingShare && currentPoem != null,
+                                modifier = Modifier.size(56.dp),
+                            ) {
+                                if (isPreparingShare) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        strokeWidth = 2.dp,
+                                    )
+                                } else {
+                                    DpIcon(
+                                        id = R.drawable.ic_share,
+                                        contentDescription = "分享",
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                }
+                            }
+
+                            OutlinedIconButton(
+                                onClick = { vm.toggleFavorite() },
+                                enabled = currentPoem != null,
+                                modifier = Modifier.size(56.dp),
+                            ) {
                                 DpIcon(
-                                    id = R.drawable.ic_share,
-                                    contentDescription = "分享",
-                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    id = if (currentPoem?.isFavorite == true) R.drawable.ic_favorite
+                                    else R.drawable.ic_favorite_border,
+                                    contentDescription = if (currentPoem?.isFavorite == true) "取消收藏" else "收藏",
+                                    tint = if (currentPoem?.isFavorite == true) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+
+                            FilledIconButton(
+                                onClick = { vm.onCarouselIndexChange(currentIndex + 1) },
+                                enabled = currentPoem != null,
+                                modifier = Modifier.size(56.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            ) {
+                                DpIcon(
+                                    id = R.drawable.ic_skip_next,
+                                    contentDescription = "下一首",
+                                    tint = MaterialTheme.colorScheme.onPrimary,
                                 )
                             }
                         }
 
-                        OutlinedIconButton(
-                            onClick = { vm.toggleFavorite() },
-                            modifier = Modifier.size(56.dp),
-                        ) {
-                            DpIcon(
-                                id = if (currentPoem.isFavorite) R.drawable.ic_favorite
-                                else R.drawable.ic_favorite_border,
-                                contentDescription = if (currentPoem.isFavorite) "取消收藏" else "收藏",
-                                tint = if (currentPoem.isFavorite) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-
-                        FilledIconButton(
-                            onClick = { vm.refreshPoem() },
-                            modifier = Modifier.size(56.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        ) {
-                            DpIcon(
-                                id = R.drawable.ic_skip_next,
-                                contentDescription = "下一首",
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                            )
-                        }
+                        Spacer(Modifier.height(32.dp))
                     }
-
-                    Spacer(Modifier.height(32.dp))
                 }
             }
         }

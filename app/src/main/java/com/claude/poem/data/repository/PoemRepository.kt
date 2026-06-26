@@ -25,6 +25,11 @@ class PoemRepository(private val context: Context) {
         return dao.getRandomPoem()?.toPoem()
     }
 
+    suspend fun getAllPoems(): List<Poem> {
+        initializeIfNeeded()
+        return dao.getAllPoems().map { it.toPoem() }
+    }
+
     suspend fun getPoemById(id: Long): Poem? {
         return dao.getPoemById(id)?.toPoem()
     }
