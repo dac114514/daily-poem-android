@@ -13,6 +13,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.claude.poem.data.local.PaintingsCatalog
 import com.claude.poem.data.local.PreferencesRepository
 import com.claude.poem.data.local.StatsRepository
 import com.claude.poem.data.model.Poem
@@ -46,8 +47,8 @@ class HomeViewModel(
         _currentPoem,
         prefs.backgroundEnabled
     ) { poem, enabled ->
-        if (!enabled || poem == null) null
-        else backgroundUrlFor(poem.id)
+        if (!enabled) null
+        else PaintingsCatalog.getDailyPainting().url
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     init {
@@ -176,7 +177,4 @@ class HomeViewModel(
     private companion object {
         const val KEY_POEM_ID = "current_poem_id"
     }
-
-    private fun backgroundUrlFor(poemId: Long): String =
-        "https://picsum.photos/seed/poem-$poemId/800/1200"
 }

@@ -137,13 +137,13 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "为每首诗随机配一张山水图",
+                            text = "每日一张,8% 透明度水印点缀卡片",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            text = "网络获取 (Lorem Picsum)",
+                            text = "公共领域中国山水画 (The Met Museum)",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
