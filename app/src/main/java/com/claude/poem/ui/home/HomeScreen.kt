@@ -12,15 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.FilledIconButton
@@ -36,8 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.claude.poem.R
+import com.claude.poem.ui.components.DpIcon
 import com.claude.poem.ui.components.PoemCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,17 +58,15 @@ fun HomeScreen(
                 },
                 actions = {
                     IconButton(onClick = onNavigateToFavorites) {
-                        Icon(
-                            imageVector = Icons.Filled.Favorite,
+                        DpIcon(
+                            id = R.drawable.ic_favorite,
                             contentDescription = "收藏列表",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
+                        DpIcon(
+                            id = R.drawable.ic_settings,
                             contentDescription = "设置",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 },
@@ -109,7 +103,6 @@ fun HomeScreen(
 
                     Spacer(Modifier.height(24.dp))
 
-                    // Action Row: 分享 · 收藏 · 下一首
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -132,9 +125,10 @@ fun HomeScreen(
                             },
                             modifier = Modifier.size(56.dp),
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.Share,
+                            DpIcon(
+                                id = R.drawable.ic_share,
                                 contentDescription = "分享",
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         }
 
@@ -142,12 +136,12 @@ fun HomeScreen(
                             onClick = { vm.toggleFavorite() },
                             modifier = Modifier.size(56.dp),
                         ) {
-                            Icon(
-                                imageVector = if (currentPoem.isFavorite) Icons.Filled.Favorite
-                                              else Icons.Filled.FavoriteBorder,
+                            DpIcon(
+                                id = if (currentPoem.isFavorite) R.drawable.ic_favorite
+                                     else R.drawable.ic_favorite_border,
                                 contentDescription = if (currentPoem.isFavorite) "取消收藏" else "收藏",
                                 tint = if (currentPoem.isFavorite) MaterialTheme.colorScheme.primary
-                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                                       else MaterialTheme.colorScheme.onSurface,
                             )
                         }
 
@@ -158,8 +152,8 @@ fun HomeScreen(
                                 containerColor = MaterialTheme.colorScheme.primary,
                             ),
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.SkipNext,
+                            DpIcon(
+                                id = R.drawable.ic_skip_next,
                                 contentDescription = "下一首",
                                 tint = MaterialTheme.colorScheme.onPrimary,
                             )

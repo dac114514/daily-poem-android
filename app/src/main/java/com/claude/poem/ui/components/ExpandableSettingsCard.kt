@@ -1,5 +1,6 @@
 package com.claude.poem.ui.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -20,11 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -34,12 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun ExpandableSettingsCard(
-    icon: ImageVector,
+    @DrawableRes iconId: Int,
     title: String,
     expanded: Boolean,
     onToggle: () -> Unit,
@@ -74,11 +71,11 @@ fun ExpandableSettingsCard(
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        imageVector = icon,
+                    DpIcon(
+                        id = iconId,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(18.dp),
+                        size = 18.dp,
                     )
                 }
                 Spacer(Modifier.width(12.dp))
@@ -87,8 +84,8 @@ fun ExpandableSettingsCard(
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f),
                 )
-                Icon(
-                    imageVector = Icons.Filled.KeyboardArrowDown,
+                DpIcon(
+                    id = com.claude.poem.R.drawable.ic_keyboard_arrow_down,
                     contentDescription = if (expanded) "收起" else "展开",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.rotate(rotation),

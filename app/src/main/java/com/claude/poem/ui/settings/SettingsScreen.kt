@@ -11,15 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,7 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.claude.poem.BuildConfig
+import com.claude.poem.R
 import com.claude.poem.data.local.ThemeMode
+import com.claude.poem.ui.components.DpIcon
 import com.claude.poem.ui.components.ExpandableSettingsCard
 import com.claude.poem.ui.components.SettingsCard
 
@@ -78,8 +74,8 @@ fun SettingsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        DpIcon(
+                            id = R.drawable.ic_arrow_back,
                             contentDescription = "返回",
                         )
                     }
@@ -100,8 +96,7 @@ fun SettingsScreen(
         ) {
             Spacer(Modifier.height(12.dp))
 
-            // 外观
-            SettingsCard(icon = Icons.Filled.Palette, title = "外观") {
+            SettingsCard(iconId = R.drawable.ic_palette, title = "外观") {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -128,9 +123,8 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // 数据统计
             SettingsCard(
-                icon = Icons.Filled.BarChart,
+                iconId = R.drawable.ic_bar_chart,
                 title = "数据统计",
                 modifier = Modifier.clickable { onNavigateToStatistics() },
             ) {
@@ -150,15 +144,13 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // 关于
             ExpandableSettingsCard(
-                icon = Icons.Filled.Info,
+                iconId = R.drawable.ic_info,
                 title = "关于",
                 expanded = aboutExpanded,
                 onToggle = { aboutExpanded = !aboutExpanded },
             ) {
                 Column(modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)) {
-                    // 应用信息
                     Text(
                         text = "每日诗文",
                         style = MaterialTheme.typography.titleLarge,

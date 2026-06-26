@@ -24,9 +24,6 @@
 -keep class androidx.compose.** { *; }
 -dontwarn androidx.compose.**
 
-# Material Icons Extended - keep all extended icon classes referenced via reflection in some build configs
--keep class androidx.compose.material.icons.** { *; }
-
 # Keep our Application/Activity entry points
 -keep class com.claude.poem.MainActivity { *; }
 -keep class com.claude.poem.data.model.** { *; }

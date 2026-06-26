@@ -9,19 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -40,7 +33,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.claude.poem.R
 import com.claude.poem.ui.components.CalendarHeatmap
+import com.claude.poem.ui.components.DpIcon
 import com.claude.poem.ui.components.WeekChart
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,8 +67,8 @@ fun StatisticsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        DpIcon(
+                            id = R.drawable.ic_arrow_back,
                             contentDescription = "返回",
                         )
                     }
@@ -92,19 +87,18 @@ fun StatisticsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
         ) {
-            // Summary cards
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 StatCard(
-                    icon = Icons.Filled.Visibility,
+                    id = R.drawable.ic_visibility,
                     label = "总浏览",
                     value = state.totalViews.toString(),
                     modifier = Modifier.weight(1f),
                 )
                 StatCard(
-                    icon = Icons.Filled.Favorite,
+                    id = R.drawable.ic_favorite,
                     label = "总收藏",
                     value = state.totalFavorites.toString(),
                     modifier = Modifier.weight(1f),
@@ -113,7 +107,6 @@ fun StatisticsScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // Weekly chart
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
@@ -130,7 +123,6 @@ fun StatisticsScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // Monthly heatmap
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
@@ -140,15 +132,14 @@ fun StatisticsScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    // Month navigation
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         IconButton(onClick = { vm.previousMonth() }) {
-                            Icon(
-                                imageVector = Icons.Filled.ChevronLeft,
+                            DpIcon(
+                                id = R.drawable.ic_chevron_left,
                                 contentDescription = "上个月",
                             )
                         }
@@ -158,8 +149,8 @@ fun StatisticsScreen(
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
                         IconButton(onClick = { vm.nextMonth() }) {
-                            Icon(
-                                imageVector = Icons.Filled.ChevronRight,
+                            DpIcon(
+                                id = R.drawable.ic_chevron_right,
                                 contentDescription = "下个月",
                             )
                         }
@@ -177,7 +168,6 @@ fun StatisticsScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // Placeholder button
             OutlinedButton(
                 onClick = {
                     Toast.makeText(context, "即将上线，敬请期待", Toast.LENGTH_SHORT).show()
@@ -187,9 +177,10 @@ fun StatisticsScreen(
                     .padding(bottom = 24.dp),
                 shape = MaterialTheme.shapes.medium,
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Download,
+                DpIcon(
+                    id = R.drawable.ic_download,
                     contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(end = 8.dp),
                 )
                 Text("生成总结海报", style = MaterialTheme.typography.labelLarge)
@@ -200,7 +191,7 @@ fun StatisticsScreen(
 
 @Composable
 private fun StatCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    id: Int,
     label: String,
     value: String,
     modifier: Modifier = Modifier,
@@ -216,8 +207,8 @@ private fun StatCard(
             modifier = Modifier.padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(
-                imageVector = icon,
+            DpIcon(
+                id = id,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
             )
