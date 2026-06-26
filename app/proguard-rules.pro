@@ -24,14 +24,6 @@
 -keep class androidx.compose.** { *; }
 -dontwarn androidx.compose.**
 
-# Coil
--keep class coil.** { *; }
--dontwarn coil.**
-
-# OkHttp (Coil dependency)
--dontwarn okhttp3.**
--dontwarn okio.**
-
 # Keep our Application/Activity entry points
 -keep class com.claude.poem.MainActivity { *; }
 -keep class com.claude.poem.data.model.** { *; }

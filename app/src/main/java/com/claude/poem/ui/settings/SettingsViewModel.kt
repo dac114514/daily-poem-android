@@ -17,14 +17,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val themeMode: StateFlow<ThemeMode> = prefs.themeMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemeMode.SYSTEM)
 
-    val backgroundEnabled: StateFlow<Boolean> = prefs.backgroundEnabled
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
-
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch { prefs.setThemeMode(mode) }
-    }
-
-    fun setBackgroundEnabled(enabled: Boolean) {
-        viewModelScope.launch { prefs.setBackgroundEnabled(enabled) }
     }
 }
