@@ -13,12 +13,17 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.claude.poem.data.local.PreferencesRepository
 import com.claude.poem.data.local.StatsRepository
 import com.claude.poem.data.model.Poem
 import com.claude.poem.data.repository.PoemRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -29,12 +34,21 @@ class HomeViewModel(
 ) : AndroidViewModel(application) {
     private val repository = PoemRepository(application)
     private val statsRepo = StatsRepository(application)
+    private val prefs = PreferencesRepository(application)
 
     private val _currentPoem = MutableStateFlow<Poem?>(null)
     val currentPoem: StateFlow<Poem?> = _currentPoem.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    val backgroundUrl: StateFlow<String?> = combine(
+        _currentPoem,
+        prefs.backgroundEnabled
+    ) { poem, enabled ->
+        if (!enabled || poem == null) null
+        else backgroundUrlFor(poem.id)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     init {
         val savedId = savedStateHandle.get<Long>(KEY_POEM_ID)
@@ -162,4 +176,7 @@ class HomeViewModel(
     private companion object {
         const val KEY_POEM_ID = "current_poem_id"
     }
+
+    private fun backgroundUrlFor(poemId: Long): String =
+        "https://picsum.photos/seed/poem-$poemId/800/1200"
 }

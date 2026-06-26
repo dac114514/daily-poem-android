@@ -17,6 +17,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -48,6 +49,7 @@ fun SettingsScreen(
     vm: SettingsViewModel = viewModel(),
 ) {
     val themeMode by vm.themeMode.collectAsState()
+    val backgroundEnabled by vm.backgroundEnabled.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
     var aboutExpanded by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
@@ -117,6 +119,38 @@ fun SettingsScreen(
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            SettingsCard(
+                iconId = R.drawable.ic_mountain,
+                title = "远山背景",
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "为每首诗随机配一张山水图",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = "网络获取 (Lorem Picsum)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = backgroundEnabled,
+                        onCheckedChange = { vm.setBackgroundEnabled(it) },
                     )
                 }
             }

@@ -45,6 +45,7 @@ fun HomeScreen(
 ) {
     val poem by vm.currentPoem.collectAsState()
     val isLoading by vm.isLoading.collectAsState()
+    val backgroundUrl by vm.backgroundUrl.collectAsState()
     val context = LocalContext.current
 
     Scaffold(
@@ -99,6 +100,7 @@ fun HomeScreen(
                     PoemCard(
                         poem = currentPoem,
                         modifier = Modifier.fillMaxWidth(),
+                        backgroundUrl = backgroundUrl,
                     )
 
                     Spacer(Modifier.height(24.dp))
