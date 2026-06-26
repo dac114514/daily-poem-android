@@ -21,6 +21,9 @@ interface PoemDao {
     @Query("SELECT COUNT(*) FROM poems WHERE is_favorite = 1")
     suspend fun getFavoriteCount(): Int
 
+    @Query("SELECT COUNT(*) FROM poems WHERE is_favorite = 1")
+    fun getFavoriteCountFlow(): Flow<Int>
+
     @Query("UPDATE poems SET is_favorite = CASE WHEN is_favorite = 0 THEN 1 ELSE 0 END, favorited_at = CASE WHEN is_favorite = 0 THEN :now ELSE NULL END WHERE id = :id")
     suspend fun toggleFavorite(id: Long, now: Long = System.currentTimeMillis())
 

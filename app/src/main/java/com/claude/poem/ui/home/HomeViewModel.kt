@@ -11,7 +11,9 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.claude.poem.data.local.StatsRepository
 import com.claude.poem.data.model.Poem
 import com.claude.poem.data.repository.PoemRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +23,12 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
+class HomeViewModel(
+    application: Application,
+    private val savedStateHandle: SavedStateHandle,
+) : AndroidViewModel(application) {
     private val repository = PoemRepository(application)
+    private val statsRepo = StatsRepository(application)
 
     private val _currentPoem = MutableStateFlow<Poem?>(null)
     val currentPoem: StateFlow<Poem?> = _currentPoem.asStateFlow()
@@ -31,13 +37,26 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        refreshPoem()
+        val savedId = savedStateHandle.get<Long>(KEY_POEM_ID)
+        if (savedId != null && savedId > 0) {
+            viewModelScope.launch {
+                _currentPoem.value = repository.getPoemById(savedId)
+                if (_currentPoem.value == null) refreshPoem()
+            }
+        } else {
+            refreshPoem()
+        }
     }
 
     fun refreshPoem() {
         viewModelScope.launch {
             _isLoading.value = true
-            _currentPoem.value = repository.getRandomPoem()
+            val poem = repository.getRandomPoem()
+            _currentPoem.value = poem
+            if (poem != null) {
+                savedStateHandle[KEY_POEM_ID] = poem.id
+                statsRepo.recordView()
+            }
             _isLoading.value = false
         }
     }
@@ -58,7 +77,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun getShareImageUri(context: Context): Uri? {
         val poem = _currentPoem.value ?: return null
 
-        // Clean up previous share images
         cleanupShareImage(context)
 
         val width = 800
@@ -82,7 +100,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             typeface = android.graphics.Typeface.SERIF
         }
 
-        // Measure heights
         val titleLayout = StaticLayout(poem.title, titlePaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1f, 0f, false)
         val authorLayout = StaticLayout(poem.author, authorPaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1f, 0f, false)
         val contentLayout = StaticLayout(poem.content, contentPaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1.8f, 0f, false)
@@ -93,10 +110,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         val canvas = Canvas(bitmap)
         canvas.drawColor(android.graphics.Color.parseColor("#FAF6F1"))
 
-        // Draw dynasty watermark background
         val dynastyPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = android.graphics.Color.parseColor("#D97757")
-            alpha = 16  // ~6% opacity
+            alpha = 16
             textSize = 180f
             typeface = android.graphics.Typeface.SERIF
             textAlign = android.graphics.Paint.Align.RIGHT
@@ -106,25 +122,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         canvas.drawText(poem.dynasty.take(2), 0f, 0f, dynastyPaint)
         canvas.restore()
 
-        // Draw title
         canvas.save()
         canvas.translate(padding.toFloat(), padding.toFloat())
         titleLayout.draw(canvas)
         canvas.restore()
 
-        // Draw author
         canvas.save()
         canvas.translate(padding.toFloat(), padding + titleLayout.height + 40f)
         authorLayout.draw(canvas)
         canvas.restore()
 
-        // Draw content
         canvas.save()
         canvas.translate(padding.toFloat(), padding + titleLayout.height + 40 + authorLayout.height + 60f)
         contentLayout.draw(canvas)
         canvas.restore()
 
-        // Save to cache
         val dir = File(context.cacheDir, "poem_share")
         dir.mkdirs()
         val file = File(dir, "poem_${poem.id}.png")
@@ -145,5 +157,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         if (dir.exists()) {
             dir.deleteRecursively()
         }
+    }
+
+    private companion object {
+        const val KEY_POEM_ID = "current_poem_id"
     }
 }

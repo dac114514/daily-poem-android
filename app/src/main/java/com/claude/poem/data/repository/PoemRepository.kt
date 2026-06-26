@@ -41,6 +41,8 @@ class PoemRepository(private val context: Context) {
 
     suspend fun getFavoriteCount(): Int = dao.getFavoriteCount()
 
+    fun getFavoriteCountFlow(): Flow<Int> = dao.getFavoriteCountFlow()
+
     private fun loadPoemsFromJson(): List<PoemEntity> {
         val json = context.assets.open("poems.json").bufferedReader().use { it.readText() }
         val type = object : TypeToken<List<PoemJson>>() {}.type

@@ -170,6 +170,7 @@ fun StatisticsScreen(
                     CalendarHeatmap(
                         year = state.currentYear,
                         month = state.currentMonth,
+                        viewedDates = state.viewedDates,
                     )
                 }
             }

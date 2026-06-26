@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -21,16 +22,18 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun CalendarHeatmap(
     year: Int,
     month: Int,
+    viewedDates: Set<String> = emptySet(),
     modifier: Modifier = Modifier,
 ) {
     val primary = MaterialTheme.colorScheme.primary
-    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -40,14 +43,27 @@ fun CalendarHeatmap(
     val cal = Calendar.getInstance()
     cal.set(year, month, 1)
     val maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-    val firstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1 // 0=Sun, 1=Mon, ...
+    val firstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1
     val weekDayNames = listOf("日", "一", "二", "三", "四", "五", "六")
     val monthNames = listOf(
         "一月", "二月", "三月", "四月", "五月", "六月",
         "七月", "八月", "九月", "十月", "十一月", "十二月"
     )
 
-    val mockActiveDays = setOf(1, 3, 5, 8, 10, 12, 15, 18, 20, 22, 25, 27, 28)
+    val keyFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.US) }
+    val monthKeyFormat = remember { SimpleDateFormat("yyyy-MM", Locale.US) }
+    val monthKey = monthKeyFormat.format(cal.time)
+
+    val dayIntensity = remember(viewedDates, monthKey) {
+        val map = HashMap<Int, Float>(maxDay)
+        for (day in 1..maxDay) {
+            val probe = Calendar.getInstance()
+            probe.set(year, month, day)
+            val key = keyFormat.format(probe.time)
+            map[day] = if (viewedDates.contains(key)) 0.6f else 0.05f
+        }
+        map
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -62,7 +78,6 @@ fun CalendarHeatmap(
         val headerHeight = 16.dp
 
         Column {
-            // Weekday header
             Row(
                 modifier = Modifier.padding(start = cellSize + cellGap),
                 verticalAlignment = Alignment.CenterVertically,
@@ -88,7 +103,6 @@ fun CalendarHeatmap(
                 val cellH = cellSize.toPx()
                 val gap = cellGap.toPx()
 
-                // Draw day cells
                 var day = 1
                 for (row in 0 until 6) {
                     for (col in 0 until 7) {
@@ -105,12 +119,7 @@ fun CalendarHeatmap(
                             val x = cellW * col + gap * col
                             val y = headerHeight.toPx() + cellH * row + gap * row
 
-                            val intensity = if (effectiveDay in mockActiveDays) {
-                                (0.3 + Math.random() * 0.5).toFloat()
-                            } else {
-                                0.05f
-                            }
-
+                            val intensity = dayIntensity[effectiveDay] ?: 0.05f
                             val cellColor = primary.copy(alpha = intensity.coerceIn(0.05f, 0.6f))
 
                             drawRoundRect(
@@ -120,13 +129,9 @@ fun CalendarHeatmap(
                                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx()),
                             )
 
-                            // Day number
                             val textPaint = android.graphics.Paint().apply {
                                 color = if (intensity > 0.3f) {
-                                    if (isDark)
-                                        android.graphics.Color.WHITE
-                                    else
-                                        android.graphics.Color.BLACK
+                                    if (isDark) android.graphics.Color.WHITE else android.graphics.Color.BLACK
                                 } else {
                                     onSurfaceVariant.toArgb()
                                 }
@@ -147,11 +152,8 @@ fun CalendarHeatmap(
             }
         }
 
-        // Legend
         Spacer(Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "少",
                 style = MaterialTheme.typography.labelSmall,

@@ -61,7 +61,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun AndroidStarterTheme(
+fun DailyPoemTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {

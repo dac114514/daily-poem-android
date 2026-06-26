@@ -16,7 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.claude.poem.data.local.ThemeMode
 import com.claude.poem.ui.navigation.AppNavHost
 import com.claude.poem.ui.settings.SettingsViewModel
-import com.claude.poem.ui.theme.AndroidStarterTheme
+import com.claude.poem.ui.theme.DailyPoemTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +38,7 @@ private fun AppRoot(settingsVm: SettingsViewModel = viewModel()) {
         ThemeMode.DARK -> true
     }
 
-    AndroidStarterTheme(darkTheme = darkTheme) {
+    DailyPoemTheme(darkTheme = darkTheme) {
         val navController = rememberNavController()
 
         AppNavHost(
