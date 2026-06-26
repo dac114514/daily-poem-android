@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.claude.poem.data.model.Poem
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -47,8 +48,8 @@ fun RingCarousel(
     val visualOffset = remember { Animatable(0f) }
 
     val pxPerCard = with(density) { (stepAngle / sensitivity).dp.toPx() }
-    val ringRPx = with(density) { 420.dp.toPx() }
-    val cameraDistPx = with(density) { 1200.dp.toPx() }
+    val ringRPx = with(density) { 360.dp.toPx() }
+    val cameraDistPx = with(density) { 2000.dp.toPx() }
 
     var lastDragTimeMs by remember { mutableStateOf(0L) }
     var releaseVelocity by remember { mutableStateOf(0f) }
@@ -122,11 +123,13 @@ fun RingCarousel(
                 absAngle > stepAngle - 5f -> 0.85f
                 else -> 1f
             }
-            val depth = 1f - absAngle / 200f * 0.15f
             val angleRad = effectiveAngle * (PI.toFloat() / 180f)
+            val zDist = ringRPx * cos(angleRad)
+            val perspectiveScale = cameraDistPx / (cameraDistPx - zDist)
 
             Box(
                 modifier = Modifier
+                    .zIndex(if (absAngle < stepAngle / 2) 2f else 1f)
                     .widthIn(max = 360.dp)
                     .fillMaxWidth()
                     .height(480.dp)
@@ -134,11 +137,10 @@ fun RingCarousel(
                         transformOrigin = TransformOrigin.Center
                         rotationY = effectiveAngle
                         translationX = ringRPx * sin(angleRad)
-                        translationZ = ringRPx * cos(angleRad)
+                        scaleX = perspectiveScale
+                        scaleY = perspectiveScale
                         cameraDistance = cameraDistPx
                         this.alpha = opacity
-                        scaleX = depth
-                        scaleY = depth
                     },
             ) {
                 PoemCard(poem = poem)
