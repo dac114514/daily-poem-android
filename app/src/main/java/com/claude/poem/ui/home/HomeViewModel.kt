@@ -79,7 +79,7 @@ class HomeViewModel(
         if (wrapped == _currentPoemIndex.value) return
         _currentPoemIndex.value = wrapped
         savedStateHandle[KEY_INDEX] = wrapped
-        statsRepo.recordView()
+        viewModelScope.launch { statsRepo.recordView() }
     }
 
     fun toggleFavorite() {
