@@ -53,7 +53,7 @@ class StatsRepository(private val context: Context) {
 
             val savedWeek = prefs[Keys.WEEKLY_WEEK_YEAR] ?: 0L
             val current = if (savedWeek == weekYear) {
-                readWeeklyList(prefs[Keys.WEEKLY_DATA])
+                prefs[Keys.WEEKLY_DATA]?.let { readWeeklyList(it) } ?: List(7) { 0 }
             } else {
                 List(7) { 0 }
             }

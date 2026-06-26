@@ -40,7 +40,8 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
         statsRepo.statsState,
         repository.getFavoriteCountFlow(),
         _monthNav
-    ) { stats, favCount, (month, year) ->
+    ) { stats, favCount, monthYear ->
+        val (month, year) = monthYear
         StatisticsState(
             totalViews = stats.totalViews,
             totalFavorites = favCount,
