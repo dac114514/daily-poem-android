@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,6 +30,12 @@ import java.io.FileOutputStream
 
 data class SharePreview(val bitmap: Bitmap, val uri: Uri)
 
+data class CardStack(
+    val left: Poem,
+    val center: Poem,
+    val right: Poem,
+)
+
 class HomeViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
@@ -37,70 +43,100 @@ class HomeViewModel(
     private val repository = PoemRepository(application)
     private val statsRepo = StatsRepository(application)
 
-    private val _poemsDeck = MutableStateFlow<List<Poem>>(emptyList())
-    val poemsDeck: StateFlow<List<Poem>> = _poemsDeck.asStateFlow()
+    private val _allPoems = MutableStateFlow<List<Poem>>(emptyList())
+    private val _stack = MutableStateFlow<CardStack?>(null)
 
-    private val _currentPoemIndex = MutableStateFlow(0)
-    val currentPoemIndex: StateFlow<Int> = _currentPoemIndex.asStateFlow()
+    val stack: StateFlow<CardStack?> = _stack.asStateFlow()
 
-    val currentPoem: StateFlow<Poem?> = combine(
-        _poemsDeck,
-        _currentPoemIndex,
-    ) { deck, index ->
-        deck.getOrNull(index)
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        null,
-    )
+    val centerPoem: StateFlow<Poem?> = _stack
+        .map { it?.center }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val leftPoem: StateFlow<Poem?> = _stack
+        .map { it?.left }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val rightPoem: StateFlow<Poem?> = _stack
+        .map { it?.right }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        val savedIndex = savedStateHandle.get<Int>(KEY_INDEX) ?: 0
-        _currentPoemIndex.value = savedIndex
         viewModelScope.launch {
             _isLoading.value = true
-            val deck = repository.getAllPoems()
-            if (deck.isNotEmpty()) {
-                val safeIndex = ((savedIndex % deck.size) + deck.size) % deck.size
-                _currentPoemIndex.value = safeIndex
+            val all = repository.getAllPoems()
+            _allPoems.value = all
+            if (all.isNotEmpty()) {
+                val savedCenterId = savedStateHandle.get<Long>(KEY_CENTER_ID)
+                _stack.value = buildStack(centerIdHint = savedCenterId)
             }
-            _poemsDeck.value = deck
             _isLoading.value = false
         }
     }
 
-    fun onCarouselIndexChange(newIndex: Int) {
-        val deck = _poemsDeck.value
-        if (deck.isEmpty()) return
-        val wrapped = ((newIndex % deck.size) + deck.size) % deck.size
-        if (wrapped == _currentPoemIndex.value) return
-        _currentPoemIndex.value = wrapped
-        savedStateHandle[KEY_INDEX] = wrapped
+    fun swipeNext() {
+        val current = _stack.value ?: return
+        val all = _allPoems.value
+        if (all.isEmpty()) return
+
+        val newLeft = drawRandom(
+            excludingIds = setOf(current.center.id, current.right.id),
+            fallback = all,
+        )
+        val newRight = drawRandom(
+            excludingIds = setOf(current.center.id, current.right.id, newLeft.id),
+            fallback = all,
+        )
+        val newStack = CardStack(
+            left = newLeft,
+            center = current.right,
+            right = newRight,
+        )
+        _stack.value = newStack
+        savedStateHandle[KEY_CENTER_ID] = newStack.center.id
+        viewModelScope.launch { statsRepo.recordView() }
+    }
+
+    fun swipePrev() {
+        val current = _stack.value ?: return
+        val all = _allPoems.value
+        if (all.isEmpty()) return
+
+        val newRight = drawRandom(
+            excludingIds = setOf(current.left.id, current.center.id),
+            fallback = all,
+        )
+        val newLeft = drawRandom(
+            excludingIds = setOf(current.left.id, current.center.id, newRight.id),
+            fallback = all,
+        )
+        val newStack = CardStack(
+            left = newLeft,
+            center = current.left,
+            right = newRight,
+        )
+        _stack.value = newStack
+        savedStateHandle[KEY_CENTER_ID] = newStack.center.id
         viewModelScope.launch { statsRepo.recordView() }
     }
 
     fun toggleFavorite() {
-        val poem = _poemsDeck.value.getOrNull(_currentPoemIndex.value) ?: return
+        val center = _stack.value?.center ?: return
         viewModelScope.launch {
-            repository.toggleFavorite(poem.id)
-            val updated = repository.getPoemById(poem.id) ?: return@launch
-            val deck = _poemsDeck.value.toMutableList()
-            val idx = deck.indexOfFirst { it.id == poem.id }
-            if (idx >= 0) {
-                deck[idx] = updated
-                _poemsDeck.value = deck
-            }
+            repository.toggleFavorite(center.id)
+            val updated = repository.getPoemById(center.id) ?: return@launch
+            _stack.value = _stack.value?.copy(center = updated)
+            _allPoems.value = _allPoems.value.map { if (it.id == updated.id) updated else it }
         }
     }
 
     suspend fun prepareSharePreview(context: Context): SharePreview? {
-        val poem = _poemsDeck.value.getOrNull(_currentPoemIndex.value) ?: return null
+        val center = _stack.value?.center ?: return null
         cleanupShareImage(context)
-        val bitmap = withContext(Dispatchers.Default) { renderShareBitmap(poem) }
-        val uri = saveShareBitmap(context, bitmap, poem.id)
+        val bitmap = withContext(Dispatchers.Default) { renderShareBitmap(center) }
+        val uri = saveShareBitmap(context, bitmap, center.id)
         return SharePreview(bitmap, uri)
     }
 
@@ -109,6 +145,24 @@ class HomeViewModel(
         if (dir.exists()) {
             dir.deleteRecursively()
         }
+    }
+
+    private fun buildStack(centerIdHint: Long?): CardStack {
+        val all = _allPoems.value
+        val center = centerIdHint
+            ?.let { id -> all.firstOrNull { it.id == id } }
+            ?: all.random()
+
+        val others = all.filter { it.id != center.id }.shuffled()
+        val left = others.getOrNull(0) ?: center
+        val right = others.getOrNull(1) ?: others.getOrNull(0) ?: center
+
+        return CardStack(left = left, center = center, right = right)
+    }
+
+    private fun drawRandom(excludingIds: Set<Long>, fallback: List<Poem>): Poem {
+        val pool = fallback.filter { it.id !in excludingIds }
+        return if (pool.isNotEmpty()) pool.random() else fallback.random()
     }
 
     private fun saveShareBitmap(context: Context, bitmap: Bitmap, poemId: Long): Uri {
@@ -239,7 +293,7 @@ class HomeViewModel(
     }
 
     private companion object {
-        const val KEY_INDEX = "carousel_index"
+        const val KEY_CENTER_ID = "center_poem_id"
         const val SHARE_CACHE_DIR = "poem_share"
 
         const val CANVAS_WIDTH = 800

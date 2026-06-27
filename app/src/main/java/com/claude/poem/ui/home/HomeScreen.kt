@@ -48,8 +48,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.claude.poem.R
+import com.claude.poem.ui.components.CardStackCarousel
 import com.claude.poem.ui.components.DpIcon
-import com.claude.poem.ui.components.RingCarousel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,9 +61,10 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     vm: HomeViewModel = viewModel(),
 ) {
-    val deck by vm.poemsDeck.collectAsState()
-    val currentIndex by vm.currentPoemIndex.collectAsState()
-    val currentPoem by vm.currentPoem.collectAsState()
+    val stack by vm.stack.collectAsState()
+    val centerPoem by vm.centerPoem.collectAsState()
+    val leftPoem by vm.leftPoem.collectAsState()
+    val rightPoem by vm.rightPoem.collectAsState()
     val isLoading by vm.isLoading.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -129,12 +130,12 @@ fun HomeScreen(
             contentAlignment = Alignment.Center,
         ) {
             when {
-                isLoading && deck.isEmpty() -> {
+                isLoading && stack == null -> {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
-                deck.isNotEmpty() -> {
+                stack != null -> {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -142,10 +143,12 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
-                        RingCarousel(
-                            poems = deck,
-                            currentIndex = currentIndex,
-                            onIndexChange = vm::onCarouselIndexChange,
+                        CardStackCarousel(
+                            leftPoem = leftPoem,
+                            centerPoem = centerPoem,
+                            rightPoem = rightPoem,
+                            onSwipeNext = vm::swipeNext,
+                            onSwipePrev = vm::swipePrev,
                             modifier = Modifier.fillMaxWidth(),
                         )
 
@@ -170,7 +173,7 @@ fun HomeScreen(
                                         if (preview != null) sharePreview = preview
                                     }
                                 },
-                                enabled = !isPreparingShare && currentPoem != null,
+                                enabled = !isPreparingShare && centerPoem != null,
                                 modifier = Modifier.size(56.dp),
                             ) {
                                 if (isPreparingShare) {
@@ -190,21 +193,21 @@ fun HomeScreen(
 
                             OutlinedIconButton(
                                 onClick = { vm.toggleFavorite() },
-                                enabled = currentPoem != null,
+                                enabled = centerPoem != null,
                                 modifier = Modifier.size(56.dp),
                             ) {
                                 DpIcon(
-                                    id = if (currentPoem?.isFavorite == true) R.drawable.ic_favorite
+                                    id = if (centerPoem?.isFavorite == true) R.drawable.ic_favorite
                                     else R.drawable.ic_favorite_border,
-                                    contentDescription = if (currentPoem?.isFavorite == true) "取消收藏" else "收藏",
-                                    tint = if (currentPoem?.isFavorite == true) MaterialTheme.colorScheme.primary
+                                    contentDescription = if (centerPoem?.isFavorite == true) "取消收藏" else "收藏",
+                                    tint = if (centerPoem?.isFavorite == true) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.onSurface,
                                 )
                             }
 
                             FilledIconButton(
-                                onClick = { vm.onCarouselIndexChange(currentIndex + 1) },
-                                enabled = currentPoem != null,
+                                onClick = { vm.swipeNext() },
+                                enabled = centerPoem != null,
                                 modifier = Modifier.size(56.dp),
                                 colors = IconButtonDefaults.filledIconButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
