@@ -5,6 +5,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -16,9 +17,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.claude.poem.data.model.Poem
@@ -33,6 +36,7 @@ private const val SWIPE_OUT_DURATION_MS = 200
 private const val SWIPE_IN_DURATION_MS = 240
 private const val SNAP_BACK_DURATION_MS = 240
 private const val MAX_DRAG_OFFSET = 1.3f
+private const val SIDE_CARD_PEEK_OVERHANG_DP = 100
 
 @Composable
 fun CardStackCarousel(
@@ -48,13 +52,13 @@ fun CardStackCarousel(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
-    val cardOffsetDp = 64.dp
+    val cardWidthDp = 280.dp
+    val cardHeightDp = 440.dp
     val dragWidthDp = 110.dp
     val restSideScale = 0.88f
     val restSideAlpha = 0.55f
     val parallaxRate = 0.7f
 
-    val cardOffsetPx = with(density) { cardOffsetDp.toPx() }
     val dragWidthPx = with(density) { dragWidthDp.toPx() }
 
     val visualPos = remember { Animatable(0f) }
@@ -62,10 +66,11 @@ fun CardStackCarousel(
     var lastDragTime by remember { mutableStateOf(0L) }
     var releaseVelocity by remember { mutableStateOf(0f) }
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .height(460.dp)
+            .clipToBounds()
             .pointerInput(centerPoem.id, leftPoem.id, rightPoem.id) {
                 detectHorizontalDragGestures(
                     onDragStart = {
@@ -139,14 +144,19 @@ fun CardStackCarousel(
             },
         contentAlignment = Alignment.Center,
     ) {
+        val sideCardOffsetDp = maxWidth / 2 + SIDE_CARD_PEEK_OVERHANG_DP.dp
+        val sideCardOffsetPx = with(density) { sideCardOffsetDp.toPx() }
+
         val p = visualPos.value
 
         CardSlot(
             role = CardRole.LEFT,
             poem = leftPoem,
             visualPos = p,
-            cardOffsetPx = cardOffsetPx,
+            sideCardOffsetPx = sideCardOffsetPx,
             dragWidthPx = dragWidthPx,
+            cardWidthDp = cardWidthDp,
+            cardHeightDp = cardHeightDp,
             restScale = restSideScale,
             restAlpha = restSideAlpha,
             parallaxRate = parallaxRate,
@@ -156,8 +166,10 @@ fun CardStackCarousel(
             role = CardRole.RIGHT,
             poem = rightPoem,
             visualPos = p,
-            cardOffsetPx = cardOffsetPx,
+            sideCardOffsetPx = sideCardOffsetPx,
             dragWidthPx = dragWidthPx,
+            cardWidthDp = cardWidthDp,
+            cardHeightDp = cardHeightDp,
             restScale = restSideScale,
             restAlpha = restSideAlpha,
             parallaxRate = parallaxRate,
@@ -167,8 +179,10 @@ fun CardStackCarousel(
             role = CardRole.CENTER,
             poem = centerPoem,
             visualPos = p,
-            cardOffsetPx = cardOffsetPx,
+            sideCardOffsetPx = sideCardOffsetPx,
             dragWidthPx = dragWidthPx,
+            cardWidthDp = cardWidthDp,
+            cardHeightDp = cardHeightDp,
             restScale = 1.0f,
             restAlpha = 1.0f,
             parallaxRate = 1.0f,
@@ -182,17 +196,19 @@ private fun CardSlot(
     role: CardRole,
     poem: Poem,
     visualPos: Float,
-    cardOffsetPx: Float,
+    sideCardOffsetPx: Float,
     dragWidthPx: Float,
+    cardWidthDp: Dp,
+    cardHeightDp: Dp,
     restScale: Float,
     restAlpha: Float,
     parallaxRate: Float,
     modifier: Modifier = Modifier,
 ) {
     val restX = when (role) {
-        CardRole.LEFT -> -cardOffsetPx
+        CardRole.LEFT -> -sideCardOffsetPx
         CardRole.CENTER -> 0f
-        CardRole.RIGHT -> cardOffsetPx
+        CardRole.RIGHT -> sideCardOffsetPx
     }
 
     val dragX = visualPos * dragWidthPx * parallaxRate
@@ -210,8 +226,8 @@ private fun CardSlot(
 
     Box(
         modifier = modifier
-            .width(280.dp)
-            .height(440.dp)
+            .width(cardWidthDp)
+            .height(cardHeightDp)
             .graphicsLayer {
                 translationX = restX + dragX
                 scaleX = scale
