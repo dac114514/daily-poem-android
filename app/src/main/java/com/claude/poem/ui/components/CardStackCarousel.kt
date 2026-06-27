@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -32,11 +33,17 @@ private enum class CardRole { LEFT, CENTER, RIGHT }
 
 private const val SWIPE_THRESHOLD = 0.4f
 private const val FLING_VELOCITY = 0.8f
-private const val SWIPE_OUT_DURATION_MS = 200
-private const val SWIPE_IN_DURATION_MS = 240
+private const val SWIPE_OUT_DURATION_MS = 220
+private const val SWIPE_IN_DURATION_MS = 280
 private const val SNAP_BACK_DURATION_MS = 240
-private const val MAX_DRAG_OFFSET = 1.3f
-private const val SIDE_CARD_PEEK_OVERHANG_DP = 100
+private const val MAX_DRAG_OFFSET = 1.5f
+private const val ANIMATION_TARGET = 1.4f
+private const val DRAG_WIDTH_DP = 280
+private const val REST_SIDE_SCALE = 0.94f
+private const val REST_SIDE_ALPHA = 0.85f
+private const val REST_CENTER_SCALE = 1.0f
+private const val REST_CENTER_ALPHA = 1.0f
+private const val FADE_OUT_COMPLETE_AT = 1.0f
 
 @Composable
 fun CardStackCarousel(
@@ -52,14 +59,10 @@ fun CardStackCarousel(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
-    val cardWidthDp = 280.dp
+    val cardWidthDp = (DRAG_WIDTH_DP).dp
     val cardHeightDp = 440.dp
-    val dragWidthDp = 110.dp
-    val restSideScale = 0.88f
-    val restSideAlpha = 0.55f
-    val parallaxRate = 0.7f
 
-    val dragWidthPx = with(density) { dragWidthDp.toPx() }
+    val dragWidthPx = with(density) { (DRAG_WIDTH_DP).dp.toPx() }
 
     val visualPos = remember { Animatable(0f) }
 
@@ -86,7 +89,7 @@ fun CardStackCarousel(
 
                             if (shouldSwipe) {
                                 val isNext = p < 0f
-                                val target = if (isNext) -1f else 1f
+                                val target = if (isNext) -ANIMATION_TARGET else ANIMATION_TARGET
 
                                 visualPos.animateTo(
                                     targetValue = target,
@@ -144,50 +147,50 @@ fun CardStackCarousel(
             },
         contentAlignment = Alignment.Center,
     ) {
-        val sideCardOffsetDp = maxWidth / 2 + SIDE_CARD_PEEK_OVERHANG_DP.dp
-        val sideCardOffsetPx = with(density) { sideCardOffsetDp.toPx() }
-
         val p = visualPos.value
 
-        CardSlot(
-            role = CardRole.LEFT,
-            poem = leftPoem,
-            visualPos = p,
-            sideCardOffsetPx = sideCardOffsetPx,
-            dragWidthPx = dragWidthPx,
-            cardWidthDp = cardWidthDp,
-            cardHeightDp = cardHeightDp,
-            restScale = restSideScale,
-            restAlpha = restSideAlpha,
-            parallaxRate = parallaxRate,
-            modifier = Modifier.zIndex(1f),
-        )
-        CardSlot(
-            role = CardRole.RIGHT,
-            poem = rightPoem,
-            visualPos = p,
-            sideCardOffsetPx = sideCardOffsetPx,
-            dragWidthPx = dragWidthPx,
-            cardWidthDp = cardWidthDp,
-            cardHeightDp = cardHeightDp,
-            restScale = restSideScale,
-            restAlpha = restSideAlpha,
-            parallaxRate = parallaxRate,
-            modifier = Modifier.zIndex(1f),
-        )
-        CardSlot(
-            role = CardRole.CENTER,
-            poem = centerPoem,
-            visualPos = p,
-            sideCardOffsetPx = sideCardOffsetPx,
-            dragWidthPx = dragWidthPx,
-            cardWidthDp = cardWidthDp,
-            cardHeightDp = cardHeightDp,
-            restScale = 1.0f,
-            restAlpha = 1.0f,
-            parallaxRate = 1.0f,
-            modifier = Modifier.zIndex(2f),
-        )
+        key(rightPoem.id) {
+            CardSlot(
+                role = CardRole.RIGHT,
+                poem = rightPoem,
+                visualPos = p,
+                dragWidthPx = dragWidthPx,
+                cardWidthDp = cardWidthDp,
+                cardHeightDp = cardHeightDp,
+                restScale = REST_SIDE_SCALE,
+                restAlpha = REST_SIDE_ALPHA,
+                fadeOutCompleteAt = FADE_OUT_COMPLETE_AT,
+                modifier = Modifier.zIndex(1f),
+            )
+        }
+        key(leftPoem.id) {
+            CardSlot(
+                role = CardRole.LEFT,
+                poem = leftPoem,
+                visualPos = p,
+                dragWidthPx = dragWidthPx,
+                cardWidthDp = cardWidthDp,
+                cardHeightDp = cardHeightDp,
+                restScale = REST_SIDE_SCALE,
+                restAlpha = REST_SIDE_ALPHA,
+                fadeOutCompleteAt = FADE_OUT_COMPLETE_AT,
+                modifier = Modifier.zIndex(1f),
+            )
+        }
+        key(centerPoem.id) {
+            CardSlot(
+                role = CardRole.CENTER,
+                poem = centerPoem,
+                visualPos = p,
+                dragWidthPx = dragWidthPx,
+                cardWidthDp = cardWidthDp,
+                cardHeightDp = cardHeightDp,
+                restScale = REST_CENTER_SCALE,
+                restAlpha = REST_CENTER_ALPHA,
+                fadeOutCompleteAt = FADE_OUT_COMPLETE_AT,
+                modifier = Modifier.zIndex(2f),
+            )
+        }
     }
 }
 
@@ -196,40 +199,35 @@ private fun CardSlot(
     role: CardRole,
     poem: Poem,
     visualPos: Float,
-    sideCardOffsetPx: Float,
     dragWidthPx: Float,
     cardWidthDp: Dp,
     cardHeightDp: Dp,
     restScale: Float,
     restAlpha: Float,
-    parallaxRate: Float,
+    fadeOutCompleteAt: Float,
     modifier: Modifier = Modifier,
 ) {
     val restX = when (role) {
-        CardRole.LEFT -> -sideCardOffsetPx
+        CardRole.LEFT -> -dragWidthPx
         CardRole.CENTER -> 0f
-        CardRole.RIGHT -> sideCardOffsetPx
+        CardRole.RIGHT -> dragWidthPx
     }
 
-    val dragX = visualPos * dragWidthPx * parallaxRate
+    val cardX = restX + visualPos * dragWidthPx
 
-    val depthFactor = abs(visualPos).coerceAtMost(1f)
-    val scale = when (role) {
-        CardRole.CENTER -> restScale - depthFactor * 0.05f
-        else -> restScale + depthFactor * 0.05f
-    }
-
+    val fadeProgress = (abs(visualPos) / fadeOutCompleteAt).coerceIn(0f, 1f)
     val alpha = when (role) {
-        CardRole.CENTER -> (restAlpha - depthFactor * 0.3f).coerceAtLeast(0f)
-        else -> (restAlpha + depthFactor * 0.2f).coerceAtMost(1f)
+        CardRole.CENTER -> restAlpha
+        else -> (restAlpha * (1f - fadeProgress)).coerceAtLeast(0f)
     }
+    val scale = restScale
 
     Box(
         modifier = modifier
             .width(cardWidthDp)
             .height(cardHeightDp)
             .graphicsLayer {
-                translationX = restX + dragX
+                translationX = cardX
                 scaleX = scale
                 scaleY = scale
                 this.alpha = alpha

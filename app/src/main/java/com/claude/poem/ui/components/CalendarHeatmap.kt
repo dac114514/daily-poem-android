@@ -1,12 +1,12 @@
 package com.claude.poem.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -16,10 +16,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
@@ -65,21 +68,28 @@ fun CalendarHeatmap(
         map
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "月度活跃 · ${monthNames[month]} $year",
-            style = MaterialTheme.typography.titleMedium,
-            color = onSurface,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
-
-        val cellSize = 28.dp
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val availableWidth = maxWidth
         val cellGap = 4.dp
-        val headerHeight = 16.dp
+        val headerHeight = 18.dp
+        val rows = 6
+
+        val cellSize = (availableWidth - cellGap * 6) / 7
+        val canvasHeight = cellSize * rows + cellGap * (rows - 1) + headerHeight
 
         Column {
+            Text(
+                text = "月度活跃 · ${monthNames[month]} $year",
+                style = MaterialTheme.typography.titleMedium,
+                color = onSurface,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start,
+            )
+
+            Spacer(Modifier.height(8.dp))
+
             Row(
-                modifier = Modifier.padding(start = cellSize + cellGap),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 weekDayNames.forEach { name ->
@@ -88,6 +98,7 @@ fun CalendarHeatmap(
                         style = MaterialTheme.typography.labelSmall,
                         color = onSurfaceVariant,
                         modifier = Modifier.size(cellSize),
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
@@ -97,14 +108,13 @@ fun CalendarHeatmap(
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(cellSize * 6 + cellGap * 5 + headerHeight)
+                    .height(canvasHeight)
             ) {
-                val cellW = cellSize.toPx()
-                val cellH = cellSize.toPx()
-                val gap = cellGap.toPx()
+                val cellPx = cellSize.toPx()
+                val gapPx = cellGap.toPx()
+                val headerPx = headerHeight.toPx()
 
-                var day = 1
-                for (row in 0 until 6) {
+                for (row in 0 until rows) {
                     for (col in 0 until 7) {
                         val isFirstWeek = row == 0
                         val effectiveDay = if (isFirstWeek) {
@@ -116,8 +126,8 @@ fun CalendarHeatmap(
                         }
 
                         if (effectiveDay > 0 && effectiveDay <= maxDay) {
-                            val x = cellW * col + gap * col
-                            val y = headerHeight.toPx() + cellH * row + gap * row
+                            val x = cellPx * col + gapPx * col
+                            val y = headerPx + cellPx * row + gapPx * row
 
                             val intensity = dayIntensity[effectiveDay] ?: 0.05f
                             val cellColor = primary.copy(alpha = intensity.coerceIn(0.05f, 0.6f))
@@ -125,8 +135,8 @@ fun CalendarHeatmap(
                             drawRoundRect(
                                 color = cellColor,
                                 topLeft = Offset(x, y),
-                                size = androidx.compose.ui.geometry.Size(cellW, cellH),
-                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx()),
+                                size = Size(cellPx, cellPx),
+                                cornerRadius = CornerRadius(4.dp.toPx()),
                             )
 
                             val textPaint = android.graphics.Paint().apply {
@@ -142,39 +152,39 @@ fun CalendarHeatmap(
 
                             drawContext.canvas.nativeCanvas.drawText(
                                 effectiveDay.toString(),
-                                x + cellW / 2,
-                                y + cellH / 2 + textPaint.textSize / 3f,
+                                x + cellPx / 2,
+                                y + cellPx / 2 + textPaint.textSize / 3f,
                                 textPaint
                             )
                         }
                     }
                 }
             }
-        }
 
-        Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "少",
-                style = MaterialTheme.typography.labelSmall,
-                color = onSurfaceVariant,
-            )
-            Spacer(Modifier.width(4.dp))
-            listOf(0.05f, 0.2f, 0.4f, 0.6f).forEach { alpha ->
-                Canvas(modifier = Modifier.size(12.dp)) {
-                    drawRoundRect(
-                        color = primary.copy(alpha = alpha),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(2.dp.toPx()),
-                    )
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "少",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = onSurfaceVariant,
+                )
+                Spacer(Modifier.width(4.dp))
+                listOf(0.05f, 0.2f, 0.4f, 0.6f).forEach { alpha ->
+                    Canvas(modifier = Modifier.size(12.dp)) {
+                        drawRoundRect(
+                            color = primary.copy(alpha = alpha),
+                            cornerRadius = CornerRadius(2.dp.toPx()),
+                        )
+                    }
+                    Spacer(Modifier.width(2.dp))
                 }
-                Spacer(Modifier.width(2.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "多",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = onSurfaceVariant,
+                )
             }
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = "多",
-                style = MaterialTheme.typography.labelSmall,
-                color = onSurfaceVariant,
-            )
         }
     }
 }

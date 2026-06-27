@@ -137,10 +137,12 @@ fun HomeScreen(
                 }
                 stack != null -> {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
+                        verticalArrangement = Arrangement.Top,
                     ) {
+                        Spacer(Modifier.weight(1f))
+
                         CardStackCarousel(
                             leftPoem = leftPoem,
                             centerPoem = centerPoem,
@@ -220,7 +222,7 @@ fun HomeScreen(
                             }
                         }
 
-                        Spacer(Modifier.height(32.dp))
+                        Spacer(Modifier.weight(0.6f))
                     }
                 }
             }
