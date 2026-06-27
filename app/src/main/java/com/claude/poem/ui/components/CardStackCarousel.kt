@@ -48,18 +48,14 @@ fun CardStackCarousel(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
-    val cardWidthDp = 280.dp
-    val cardHeightDp = 440.dp
     val cardOffsetDp = 64.dp
     val dragWidthDp = 110.dp
-    val depthDp = 28.dp
     val restSideScale = 0.88f
     val restSideAlpha = 0.55f
     val parallaxRate = 0.7f
 
     val cardOffsetPx = with(density) { cardOffsetDp.toPx() }
     val dragWidthPx = with(density) { dragWidthDp.toPx() }
-    val depthPx = with(density) { depthDp.toPx() }
 
     val visualPos = remember { Animatable(0f) }
 
@@ -151,7 +147,6 @@ fun CardStackCarousel(
             visualPos = p,
             cardOffsetPx = cardOffsetPx,
             dragWidthPx = dragWidthPx,
-            depthPx = depthPx,
             restScale = restSideScale,
             restAlpha = restSideAlpha,
             parallaxRate = parallaxRate,
@@ -163,7 +158,6 @@ fun CardStackCarousel(
             visualPos = p,
             cardOffsetPx = cardOffsetPx,
             dragWidthPx = dragWidthPx,
-            depthPx = depthPx,
             restScale = restSideScale,
             restAlpha = restSideAlpha,
             parallaxRate = parallaxRate,
@@ -175,7 +169,6 @@ fun CardStackCarousel(
             visualPos = p,
             cardOffsetPx = cardOffsetPx,
             dragWidthPx = dragWidthPx,
-            depthPx = depthPx,
             restScale = 1.0f,
             restAlpha = 1.0f,
             parallaxRate = 1.0f,
@@ -191,7 +184,6 @@ private fun CardSlot(
     visualPos: Float,
     cardOffsetPx: Float,
     dragWidthPx: Float,
-    depthPx: Float,
     restScale: Float,
     restAlpha: Float,
     parallaxRate: Float,
@@ -202,22 +194,18 @@ private fun CardSlot(
         CardRole.CENTER -> 0f
         CardRole.RIGHT -> cardOffsetPx
     }
-    val restZ = if (role == CardRole.CENTER) 0f else -depthPx
 
     val dragX = visualPos * dragWidthPx * parallaxRate
 
-    val centerPushBack = if (role == CardRole.CENTER) abs(visualPos) * depthPx * 0.3f else 0f
-    val sideForward = if (role != CardRole.CENTER) (1f - abs(visualPos)) * depthPx * 0.4f else 0f
-    val z = restZ + sideForward - centerPushBack
-
+    val depthFactor = abs(visualPos).coerceAtMost(1f)
     val scale = when (role) {
-        CardRole.CENTER -> restScale - abs(visualPos) * 0.05f
-        else -> restScale + abs(visualPos) * 0.05f
+        CardRole.CENTER -> restScale - depthFactor * 0.05f
+        else -> restScale + depthFactor * 0.05f
     }
 
     val alpha = when (role) {
-        CardRole.CENTER -> (restAlpha - abs(visualPos) * 0.3f).coerceAtLeast(0f)
-        else -> (restAlpha + abs(visualPos) * 0.2f).coerceAtMost(1f)
+        CardRole.CENTER -> (restAlpha - depthFactor * 0.3f).coerceAtLeast(0f)
+        else -> (restAlpha + depthFactor * 0.2f).coerceAtMost(1f)
     }
 
     Box(
@@ -226,7 +214,6 @@ private fun CardSlot(
             .height(440.dp)
             .graphicsLayer {
                 translationX = restX + dragX
-                translationZ = z
                 scaleX = scale
                 scaleY = scale
                 this.alpha = alpha
